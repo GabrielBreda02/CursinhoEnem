@@ -3,6 +3,8 @@ const id = params.get("id");
 
 const tituloInput = document.getElementById("titulo");
 const disciplinaInput = document.getElementById("disciplina");
+const tempoLimiteInput = document.getElementById("tempoLimite");
+const temaRedacaoSelect = document.getElementById("temaRedacao");
 const filtroDisciplinaInput = document.getElementById("filtroDisciplina");
 const filtroAssuntoInput = document.getElementById("filtroAssunto");
 const listaBanco = document.getElementById("tabelaQuestoes");
@@ -10,16 +12,29 @@ const listaSelecionadas = document.getElementById("tabelaSelecionadas");
 
 let questoesSelecionadas = [];
 
-if (id) {
-    fetch(`${API_BASE}/Provas/${id}`)
-        .then(res => res.json())
-        .then(prova => {
-            tituloInput.value = prova.titulo;
-            disciplinaInput.value = prova.disciplina;
-            questoesSelecionadas = prova.questoes.map(q => q.idQuestao);
-            carregarQuestoesSelecionadas();
+fetch(`${API_BASE}/temas-redacao`)
+    .then(res => res.json())
+    .then(temas => {
+        temas.forEach(tema => {
+            const option = document.createElement("option");
+            option.value = tema.idTemaRedacao;
+            option.textContent = tema.titulo;
+            temaRedacaoSelect.appendChild(option);
         });
-}
+
+        if (id) {
+            fetch(`${API_BASE}/Provas/${id}`)
+                .then(res => res.json())
+                .then(prova => {
+                    tituloInput.value = prova.titulo;
+                    disciplinaInput.value = prova.disciplina;
+                    tempoLimiteInput.value = prova.tempoLimiteMinutos;
+                    temaRedacaoSelect.value = prova.temaRedacaoId || "";
+                    questoesSelecionadas = prova.questoes.map(q => q.idQuestao);
+                    carregarQuestoesSelecionadas();
+                });
+        }
+    });
 
 function buscarQuestoes() {
     const disciplina = filtroDisciplinaInput.value;
@@ -88,6 +103,8 @@ function salvarProva() {
     const dados = {
         titulo: tituloInput.value.trim(),
         disciplina: disciplinaInput.value.trim(),
+        tempoLimiteMinutos: Number(tempoLimiteInput.value) || 180,
+        temaRedacaoId: temaRedacaoSelect.value ? Number(temaRedacaoSelect.value) : null,
         QuestoesIds: questoesSelecionadas
     };
 

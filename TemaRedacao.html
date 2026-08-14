@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tema de Redação</title>
+  <link rel="stylesheet" href="Estilo.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <h1 id="tituloPagina">Novo Tema de Redação</h1>
+
+    <form id="formTema">
+      <div class="campo">
+        <label>Título</label>
+        <input type="text" id="titulo" placeholder="Ex.: Desafios para a valorização de comunidades tradicionais no Brasil">
+      </div>
+
+      <div class="row">
+        <div class="campo">
+          <label>Ano do ENEM (se o tema vier de uma prova real)</label>
+          <input type="number" id="ano" placeholder="Ex.: 2019">
+        </div>
+        <div class="campo">
+          <label>Fonte</label>
+          <input type="text" id="fonte" placeholder="Ex.: ENEM 2019 ou Autoral">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Texto motivador</label>
+        <textarea id="textoMotivador" placeholder="Textos de apoio que o aluno vai ler antes de escrever a redação..." style="min-height:200px;"></textarea>
+      </div>
+
+      <div class="acoes">
+        <button type="button" onclick="salvarTema()" class="btn">Salvar</button>
+        <button type="button" onclick="window.location.href='TemasRedacao.html'" class="btn"> Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="TemaRedacao.js"></script>
+</body>
+
+</html>

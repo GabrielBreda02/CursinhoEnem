@@ -1,0 +1,12 @@
+global using Xunit;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;
+global using BancoQuestoes.Api.Data;
+global using BancoQuestoes.Api.Models;
+global using BancoQuestoes.Api.Requests;
+global using BancoQuestoes.Api.Responses;
+global using BancoQuestoes.Api;
+global using System.Net;
+global using System.Text;
+global using System.Text.Json; 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu Inicial</title>
+  <link rel="stylesheet" href="Estilo.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div id="userBar" class="user-bar"></div>
+
+    <h1 class="titulo">Menu Principal</h1>
+    <div class="button-group">
+      <a href="Questoes.html" class="botao-link">Cadastrar Questões</a>
+      <a href="Provas.html" class="botao-link">Gerar Provas</a>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const userBar = document.getElementById("userBar");
+    userBar.innerHTML = estaLogado()
+      ? `<span>Olá, ${getNomeUsuario()}</span> <button class="btn" onclick="logout()">Sair</button>`
+      : `<span>Você não está logado</span> <a class="btn" href="Login.html">Entrar</a>`;
+  </script>
+</body>
+
+</html>

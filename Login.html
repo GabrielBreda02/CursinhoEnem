@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar</title>
+  <link rel="stylesheet" href="Estilo.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <h1 class="titulo">Entrar</h1>
+
+    <p id="avisoRegistro" class="mensagem-sucesso" style="display:none;">
+      Cadastro realizado com sucesso! Faça login para continuar.
+    </p>
+    <p id="mensagemErro" class="mensagem-erro" style="display:none;"></p>
+
+    <form id="formLogin">
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input type="text" id="email" placeholder="seu@email.com" autocomplete="username">
+      </div>
+
+      <div class="campo">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" placeholder="Sua senha" autocomplete="current-password">
+      </div>
+
+      <div class="acoes">
+        <button type="button" onclick="entrar()" class="btn">Entrar</button>
+      </div>
+    </form>
+
+    <p style="margin-top:16px;">
+      Ainda não tem conta? <a href="Registro.html">Cadastre-se</a>
+    </p>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="Login.js"></script>
+</body>
+
+</html>

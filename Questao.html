@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Questão</title>
+  <link rel="stylesheet" href="Estilo.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <h1 id="tituloPagina">Nova Questão</h1>
+
+    <form id="formQuestao">
+
+      <div class="campo">
+        <label>Disciplina ( sem abreviação)</label>
+        <input type="text" id="disciplina" placeholder="Ex.: Programação Web">
+      </div>
+
+      <div class="campo">
+        <label>Assuntos (separados por vírgula)</label>
+        <input type="text" id="assuntos" placeholder="Ex.: HTML, CSS, JavaScript">
+      </div>
+
+      <div class="campo">
+        <label>Título ( enunciado ) </label>
+        <textarea id="titulo" placeholder="Digite o enunciado completo da questão..."></textarea>
+      </div>
+
+      <div class="campo">
+        <label>Alternativas</label>
+
+        <div class="alternativas" id="alternativa">
+        </div>
+
+      </div>
+
+      <div class="acoes">
+        <button type="button" onclick="salvarQuestao()" class="btn">Salvar</button>
+        <button type="button" onclick="window.location.href='questoes.html'" class="btn"> Cancelar</button>
+      </div>
+
+    </form>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="Questao.js"></script>
+</body>
+
+</html>

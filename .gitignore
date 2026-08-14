@@ -1,0 +1,17 @@
+# Build results (.NET)
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+.vs/
+
+# Bancos SQLite locais
+*.db
+*.db-shm
+*.db-wal
+
+# Configuração local do Claude Code (preview/testes)
+.claude/
+
+# Pacote zip antigo
+fsg-banco-questoes-api.zip

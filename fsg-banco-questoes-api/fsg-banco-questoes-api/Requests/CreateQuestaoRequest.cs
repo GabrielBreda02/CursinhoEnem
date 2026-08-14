@@ -13,7 +13,17 @@ public class CreateQuestaoRequest
     public string Disciplina { get; set; } = string.Empty;
     
     public List<string> Assuntos { get; set; } = new();
-    
+
+    [Required(ErrorMessage = "A área de conhecimento é obrigatória")]
+    public string Area { get; set; } = string.Empty;
+
+    public string? ImagemUrl { get; set; }
+
+    public int? Ano { get; set; }
+
+    [StringLength(150, ErrorMessage = "A fonte deve ter no máximo 150 caracteres")]
+    public string? Fonte { get; set; }
+
     [Required(ErrorMessage = "É necessário pelo menos uma alternativa")]
     [MinLength(2, ErrorMessage = "Deve haver pelo menos 2 alternativas")]
     public List<CreateAlternativaRequest> Alternativas { get; set; } = new();

@@ -31,10 +31,12 @@ function registrar() {
         return;
     }
 
+    const tipo = document.querySelector('input[name="tipo"]:checked').value;
+
     fetch(`${API_BASE}/auth/registrar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, email, senha })
+        body: JSON.stringify({ nome, email, senha, tipo })
     })
         .then(async response => {
             const dados = await response.json().catch(() => ({}));

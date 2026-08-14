@@ -15,4 +15,10 @@ public class CreateProvaRequest
     [Required(ErrorMessage = "É necessário pelo menos uma questão")]
     [MinLength(1, ErrorMessage = "Deve haver pelo menos 1 questão")]
     public List<int> QuestoesIds { get; set; } = new();
-} 
+
+    [Range(1, 600, ErrorMessage = "O tempo limite deve ser entre 1 e 600 minutos")]
+    public int TempoLimiteMinutos { get; set; } = 180;
+
+    /// <summary>Tema de redação da prova (opcional).</summary>
+    public int? TemaRedacaoId { get; set; }
+}

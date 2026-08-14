@@ -25,33 +25,44 @@ public class QuestoesController : ControllerBase
     /// </summary>
     /// <param name="disciplina">Filtro por disciplina (opcional)</param>
     /// <param name="assunto">Filtro por assunto (opcional)</param>
+    /// <param name="area">Filtro por área de conhecimento do ENEM (opcional)</param>
     /// <returns>Lista de questões</returns>
     [HttpGet]
     [ProducesResponseType(typeof(List<QuestaoListResponse>), 200)]
     public async Task<ActionResult<List<QuestaoListResponse>>> GetQuestoes(
         [FromQuery] string? disciplina = null,
-        [FromQuery] string? assunto = null)
+        [FromQuery] string? assunto = null,
+        [FromQuery] string? area = null)
     {
         var query = _context.Questoes.AsQueryable();
-        
+
         if (!string.IsNullOrEmpty(disciplina))
         {
             query = query.Where(q => q.Disciplina.ToLower().Contains(disciplina.ToLower()));
         }
-        
+
         if (!string.IsNullOrEmpty(assunto))
         {
             query = query.Where(q => q.AssuntosJson.Contains(assunto));
         }
-        
+
+        if (!string.IsNullOrEmpty(area))
+        {
+            query = query.Where(q => q.Area == area);
+        }
+
         var questoes = await query.ToListAsync();
-        
+
         var response = questoes.Select(q => new QuestaoListResponse
         {
             IdQuestao = q.IdQuestao,
             Titulo = q.Titulo,
             Disciplina = q.Disciplina,
-            Assuntos = q.Assuntos
+            Assuntos = q.Assuntos,
+            Area = q.Area,
+            ImagemUrl = q.ImagemUrl,
+            Ano = q.Ano,
+            Fonte = q.Fonte
         }).ToList();
 
         return Ok(response);
@@ -86,6 +97,10 @@ public class QuestoesController : ControllerBase
             Titulo = questao.Titulo,
             Disciplina = questao.Disciplina,
             Assuntos = questao.Assuntos,
+            Area = questao.Area,
+            ImagemUrl = questao.ImagemUrl,
+            Ano = questao.Ano,
+            Fonte = questao.Fonte,
             Alternativas = questao.Alternativas.Select(a => new AlternativaResponse
             {
                 IdAlternativa = a.IdAlternativa,
@@ -93,7 +108,7 @@ public class QuestoesController : ControllerBase
                 Correta = a.Correta
             }).ToList()
         };
-        
+
         return Ok(response);
     }
 
@@ -126,19 +141,32 @@ public class QuestoesController : ControllerBase
                 Success = false
             });
         }
-        
+
+        if (!AreaConhecimento.EhValida(request.Area))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Message = "Área de conhecimento inválida",
+                Success = false
+            });
+        }
+
         var questao = new Questao
         {
             Titulo = request.Titulo,
             Disciplina = request.Disciplina,
             Assuntos = request.Assuntos,
+            Area = request.Area,
+            ImagemUrl = request.ImagemUrl,
+            Ano = request.Ano,
+            Fonte = request.Fonte,
             Alternativas = request.Alternativas.Select(a => new Alternativa
             {
                 Descricao = a.Descricao,
                 Correta = a.Correta
             }).ToList()
         };
-        
+
         _context.Questoes.Add(questao);
         await _context.SaveChangesAsync();
         
@@ -195,11 +223,24 @@ public class QuestoesController : ControllerBase
                 Success = false
             });
         }
-        
+
+        if (!AreaConhecimento.EhValida(request.Area))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Message = "Área de conhecimento inválida",
+                Success = false
+            });
+        }
+
         questao.Titulo = request.Titulo;
         questao.Disciplina = request.Disciplina;
         questao.Assuntos = request.Assuntos;
-        
+        questao.Area = request.Area;
+        questao.ImagemUrl = request.ImagemUrl;
+        questao.Ano = request.Ano;
+        questao.Fonte = request.Fonte;
+
         // Remover alternativas existentes
         _context.Alternativas.RemoveRange(questao.Alternativas);
         

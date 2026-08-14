@@ -15,4 +15,7 @@ public class Usuario
     public string Email { get; set; } = string.Empty;
 
     public string SenhaHash { get; set; } = string.Empty;
+
+    /// <summary>"Professor" ou "Aluno". Ver <see cref="Requests.RegistrarUsuarioRequest"/> para a validação.</summary>
+    public string Tipo { get; set; } = "Aluno";
 }

@@ -30,14 +30,18 @@ public class ProvasController : ControllerBase
     {
         var provas = await _context.Provas
             .Include(p => p.Questoes)
+            .Include(p => p.TemaRedacao)
             .ToListAsync();
-        
+
         var response = provas.Select(p => new ProvaListResponse
         {
             IdProva = p.IdProva,
             Titulo = p.Titulo,
             Disciplina = p.Disciplina,
-            QuantidadeQuestoes = p.Questoes.Count
+            QuantidadeQuestoes = p.Questoes.Count,
+            TempoLimiteMinutos = p.TempoLimiteMinutos,
+            TemaRedacaoId = p.TemaRedacaoId,
+            TemaRedacaoTitulo = p.TemaRedacao?.Titulo
         }).ToList();
 
         return Ok(response);
@@ -56,8 +60,9 @@ public class ProvasController : ControllerBase
         var prova = await _context.Provas
             .Include(p => p.Questoes)
             .ThenInclude(q => q.Alternativas)
+            .Include(p => p.TemaRedacao)
             .FirstOrDefaultAsync(p => p.IdProva == id);
-        
+
         if (prova == null)
         {
             return NotFound(new ApiResponse
@@ -66,18 +71,25 @@ public class ProvasController : ControllerBase
                 Success = false
             });
         }
-        
+
         var response = new ProvaDetailResponse
         {
             IdProva = prova.IdProva,
             Titulo = prova.Titulo,
             Disciplina = prova.Disciplina,
+            TempoLimiteMinutos = prova.TempoLimiteMinutos,
+            TemaRedacaoId = prova.TemaRedacaoId,
+            TemaRedacaoTitulo = prova.TemaRedacao?.Titulo,
             Questoes = prova.Questoes.Select(q => new QuestaoDetailResponse
             {
                 IdQuestao = q.IdQuestao,
                 Titulo = q.Titulo,
                 Disciplina = q.Disciplina,
                 Assuntos = q.Assuntos,
+                Area = q.Area,
+                ImagemUrl = q.ImagemUrl,
+                Ano = q.Ano,
+                Fonte = q.Fonte,
                 Alternativas = q.Alternativas.Select(a => new AlternativaResponse
                 {
                     IdAlternativa = a.IdAlternativa,
@@ -86,7 +98,7 @@ public class ProvasController : ControllerBase
                 }).ToList()
             }).ToList()
         };
-        
+
         return Ok(response);
     }
 
@@ -126,17 +138,29 @@ public class ProvasController : ControllerBase
             });
         }
         
+        if (request.TemaRedacaoId.HasValue &&
+            !await _context.TemasRedacao.AnyAsync(t => t.IdTemaRedacao == request.TemaRedacaoId.Value))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Message = $"Tema de redação com ID {request.TemaRedacaoId} não encontrado",
+                Success = false
+            });
+        }
+
         var questoes = await _context.Questoes
             .Where(q => request.QuestoesIds.Contains(q.IdQuestao))
             .ToListAsync();
-        
+
         var prova = new Prova
         {
             Titulo = request.Titulo,
             Disciplina = request.Disciplina,
+            TempoLimiteMinutos = request.TempoLimiteMinutos,
+            TemaRedacaoId = request.TemaRedacaoId,
             Questoes = questoes
         };
-        
+
         _context.Provas.Add(prova);
         await _context.SaveChangesAsync();
         
@@ -200,14 +224,26 @@ public class ProvasController : ControllerBase
             });
         }
         
+        if (request.TemaRedacaoId.HasValue &&
+            !await _context.TemasRedacao.AnyAsync(t => t.IdTemaRedacao == request.TemaRedacaoId.Value))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Message = $"Tema de redação com ID {request.TemaRedacaoId} não encontrado",
+                Success = false
+            });
+        }
+
         var questoes = await _context.Questoes
             .Where(q => request.QuestoesIds.Contains(q.IdQuestao))
             .ToListAsync();
-        
+
         prova.Titulo = request.Titulo;
         prova.Disciplina = request.Disciplina;
+        prova.TempoLimiteMinutos = request.TempoLimiteMinutos;
+        prova.TemaRedacaoId = request.TemaRedacaoId;
         prova.Questoes = questoes;
-        
+
         await _context.SaveChangesAsync();
         
         return Ok(new ApiResponse

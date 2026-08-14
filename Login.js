@@ -36,7 +36,7 @@ function entrar() {
             return dados;
         })
         .then(dados => {
-            salvarSessao(dados.token, dados.nome, dados.email);
+            salvarSessao(dados.token, dados.nome, dados.email, dados.tipo);
             window.location.href = "index.html";
         })
         .catch(erro => {

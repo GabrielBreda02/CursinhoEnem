@@ -16,4 +16,8 @@ public class RegistrarUsuarioRequest
     [Required(ErrorMessage = "A senha é obrigatória")]
     [MinLength(6, ErrorMessage = "A senha deve ter no mínimo 6 caracteres")]
     public string Senha { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "O tipo de usuário é obrigatório")]
+    [RegularExpression("^(Professor|Aluno)$", ErrorMessage = "Tipo deve ser 'Professor' ou 'Aluno'")]
+    public string Tipo { get; set; } = string.Empty;
 }

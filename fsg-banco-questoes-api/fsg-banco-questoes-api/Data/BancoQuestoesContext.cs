@@ -13,6 +13,9 @@ public class BancoQuestoesContext : DbContext
     public DbSet<Alternativa> Alternativas { get; set; }
     public DbSet<Prova> Provas { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<TemaRedacao> TemasRedacao { get; set; }
+    public DbSet<TentativaProva> Tentativas { get; set; }
+    public DbSet<RespostaAluno> RespostasAluno { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,8 +26,11 @@ public class BancoQuestoesContext : DbContext
             entity.Property(e => e.Titulo).IsRequired().HasMaxLength(500);
             entity.Property(e => e.Disciplina).IsRequired().HasMaxLength(100);
             entity.Property(e => e.AssuntosJson).HasDefaultValue("[]");
+            entity.Property(e => e.Area).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.ImagemUrl).HasMaxLength(500);
+            entity.Property(e => e.Fonte).HasMaxLength(150);
             entity.Ignore(e => e.Assuntos);
-            
+
             entity.HasMany(e => e.Alternativas)
                   .WithOne(a => a.Questao)
                   .HasForeignKey(a => a.QuestaoId)
@@ -45,13 +51,19 @@ public class BancoQuestoesContext : DbContext
             entity.HasKey(e => e.IdProva);
             entity.Property(e => e.Titulo).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Disciplina).IsRequired().HasMaxLength(100);
-            
+            entity.Property(e => e.TempoLimiteMinutos).IsRequired();
+
             entity.HasMany(e => e.Questoes)
                   .WithMany(q => q.Provas)
                   .UsingEntity<Dictionary<string, object>>(
                       "ProvaQuestao",
                       j => j.HasOne<Questao>().WithMany().HasForeignKey("QuestaoId"),
                       j => j.HasOne<Prova>().WithMany().HasForeignKey("ProvaId"));
+
+            entity.HasOne(e => e.TemaRedacao)
+                  .WithMany()
+                  .HasForeignKey(e => e.TemaRedacaoId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Configuração da entidade Usuario
@@ -61,7 +73,56 @@ public class BancoQuestoesContext : DbContext
             entity.Property(e => e.Nome).IsRequired().HasMaxLength(150);
             entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
             entity.Property(e => e.SenhaHash).IsRequired();
+            entity.Property(e => e.Tipo).IsRequired().HasMaxLength(20);
             entity.HasIndex(e => e.Email).IsUnique();
+        });
+
+        // Configuração da entidade TemaRedacao
+        modelBuilder.Entity<TemaRedacao>(entity =>
+        {
+            entity.HasKey(e => e.IdTemaRedacao);
+            entity.Property(e => e.Titulo).IsRequired().HasMaxLength(300);
+            entity.Property(e => e.TextoMotivador).IsRequired();
+            entity.Property(e => e.Fonte).HasMaxLength(150);
+        });
+
+        // Configuração da entidade TentativaProva
+        modelBuilder.Entity<TentativaProva>(entity =>
+        {
+            entity.HasKey(e => e.IdTentativa);
+
+            entity.HasOne(e => e.Prova)
+                  .WithMany()
+                  .HasForeignKey(e => e.ProvaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Aluno)
+                  .WithMany()
+                  .HasForeignKey(e => e.AlunoId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Configuração da entidade RespostaAluno
+        modelBuilder.Entity<RespostaAluno>(entity =>
+        {
+            entity.HasKey(e => e.IdResposta);
+
+            entity.HasOne(e => e.Tentativa)
+                  .WithMany(t => t.Respostas)
+                  .HasForeignKey(e => e.TentativaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Questao)
+                  .WithMany()
+                  .HasForeignKey(e => e.QuestaoId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.AlternativaSelecionada)
+                  .WithMany()
+                  .HasForeignKey(e => e.AlternativaSelecionadaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new { e.TentativaId, e.QuestaoId }).IsUnique();
         });
 
         base.OnModelCreating(modelBuilder);

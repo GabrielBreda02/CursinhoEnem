@@ -7,11 +7,13 @@ const API_BASE = "http://localhost:5000/api";
 const TOKEN_KEY = "bq_token";
 const NOME_KEY = "bq_nome";
 const EMAIL_KEY = "bq_email";
+const TIPO_KEY = "bq_tipo";
 
-function salvarSessao(token, nome, email) {
+function salvarSessao(token, nome, email, tipo) {
     localStorage.setItem(TOKEN_KEY, token);
     localStorage.setItem(NOME_KEY, nome);
     localStorage.setItem(EMAIL_KEY, email);
+    localStorage.setItem(TIPO_KEY, tipo);
 }
 
 function getToken() {
@@ -22,6 +24,18 @@ function getNomeUsuario() {
     return localStorage.getItem(NOME_KEY);
 }
 
+function getTipoUsuario() {
+    return localStorage.getItem(TIPO_KEY);
+}
+
+function ehProfessor() {
+    return getTipoUsuario() === "Professor";
+}
+
+function ehAluno() {
+    return getTipoUsuario() === "Aluno";
+}
+
 function estaLogado() {
     return !!getToken();
 }
@@ -30,6 +44,7 @@ function logout() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(NOME_KEY);
     localStorage.removeItem(EMAIL_KEY);
+    localStorage.removeItem(TIPO_KEY);
     window.location.href = "Login.html";
 }
 

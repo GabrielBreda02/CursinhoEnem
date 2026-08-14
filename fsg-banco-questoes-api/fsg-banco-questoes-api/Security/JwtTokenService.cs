@@ -30,7 +30,8 @@ public class JwtTokenService
             new Claim(JwtRegisteredClaimNames.Sub, usuario.IdUsuario.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
             new Claim(JwtRegisteredClaimNames.Name, usuario.Nome),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Role, usuario.Tipo)
         };
 
         var credenciais = new SigningCredentials(

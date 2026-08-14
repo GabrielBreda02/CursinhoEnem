@@ -36,6 +36,18 @@
         <input type="password" id="confirmarSenha" placeholder="Repita a senha" autocomplete="new-password">
       </div>
 
+      <div class="campo">
+        <label>Eu sou</label>
+        <div class="alternativa">
+          <input type="radio" name="tipo" id="tipoAluno" value="Aluno" checked>
+          <label for="tipoAluno" style="font-weight:normal;margin:0;">Aluno — quero fazer simulados</label>
+        </div>
+        <div class="alternativa">
+          <input type="radio" name="tipo" id="tipoProfessor" value="Professor">
+          <label for="tipoProfessor" style="font-weight:normal;margin:0;">Professor — quero cadastrar questões e provas</label>
+        </div>
+      </div>
+
       <div class="acoes">
         <button type="button" onclick="registrar()" class="btn">Cadastrar</button>
       </div>

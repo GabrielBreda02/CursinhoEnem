@@ -16,14 +16,27 @@ public class Questao
     public string Disciplina { get; set; } = string.Empty;
     
     public string AssuntosJson { get; set; } = "[]";
-    
+
     public List<string> Assuntos
     {
         get => string.IsNullOrEmpty(AssuntosJson) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(AssuntosJson) ?? new List<string>();
         set => AssuntosJson = JsonSerializer.Serialize(value);
     }
-    
+
+    /// <summary>Uma das 4 áreas do ENEM — ver <see cref="AreaConhecimento"/>.</summary>
+    public string Area { get; set; } = string.Empty;
+
+    /// <summary>URL relativa da imagem do enunciado (ex.: /uploads/questoes/xxx.png), se houver.</summary>
+    public string? ImagemUrl { get; set; }
+
+    /// <summary>Ano do ENEM de origem, se a questão vier de uma prova real. Nulo se for autoral.</summary>
+    public int? Ano { get; set; }
+
+    /// <summary>Ex.: "ENEM 2019" ou "Autoral".</summary>
+    [StringLength(150)]
+    public string? Fonte { get; set; }
+
     public List<Alternativa> Alternativas { get; set; } = new();
-    
+
     public List<Prova> Provas { get; set; } = new();
-} 
+}

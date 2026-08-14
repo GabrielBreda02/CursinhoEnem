@@ -59,7 +59,8 @@ public class AuthController : ControllerBase
         {
             Nome = request.Nome.Trim(),
             Email = emailNormalizado,
-            SenhaHash = PasswordHasher.Hash(request.Senha)
+            SenhaHash = PasswordHasher.Hash(request.Senha),
+            Tipo = request.Tipo
         };
 
         _context.Usuarios.Add(usuario);
@@ -113,7 +114,8 @@ public class AuthController : ControllerBase
             Token = token,
             ExpiraEm = expiraEm,
             Nome = usuario.Nome,
-            Email = usuario.Email
+            Email = usuario.Email,
+            Tipo = usuario.Tipo
         });
     }
 }

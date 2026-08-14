@@ -1,17 +1,23 @@
+using System.Text.Json;
 using BancoQuestoes.Api.Models;
 using BancoQuestoes.Api.Security;
 
 namespace BancoQuestoes.Api.Data;
 
 /// <summary>
-/// Popula o banco com dados de exemplo na primeira execução, para que o sistema
-/// não seja entregue/avaliado totalmente vazio. Não faz nada se já existir usuário cadastrado.
-/// O acervo de questões/temas de redação reais do ENEM e a prova de exemplo são adicionados
-/// separadamente (ver SeedEnem), depois que o conteúdo curado estiver pronto.
+/// Popula o banco na primeira execução: usuários de teste e o acervo curado de questões
+/// reais do ENEM (lido de Data/Seed/questoes_enem.json). Cada etapa só roda se ainda não
+/// existir o respectivo dado, então é seguro chamar em toda inicialização.
 /// </summary>
 public static class DbSeeder
 {
     public static void Seed(BancoQuestoesContext context)
+    {
+        SeedUsuarios(context);
+        SeedEnem(context);
+    }
+
+    private static void SeedUsuarios(BancoQuestoesContext context)
     {
         if (context.Usuarios.Any())
         {
@@ -35,5 +41,92 @@ public static class DbSeeder
         });
 
         context.SaveChanges();
+    }
+
+    private static void SeedEnem(BancoQuestoesContext context)
+    {
+        if (context.Questoes.Any() || context.TemasRedacao.Any())
+        {
+            return;
+        }
+
+        var caminho = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "questoes_enem.json");
+        if (!File.Exists(caminho))
+        {
+            return;
+        }
+
+        var json = File.ReadAllText(caminho);
+        var dados = JsonSerializer.Deserialize<SeedData>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (dados == null)
+        {
+            return;
+        }
+
+        foreach (var tema in dados.TemasRedacao)
+        {
+            context.TemasRedacao.Add(new TemaRedacao
+            {
+                Titulo = tema.Titulo,
+                TextoMotivador = tema.TextoMotivador,
+                Ano = tema.Ano,
+                Fonte = tema.Fonte
+            });
+        }
+
+        foreach (var questao in dados.Questoes)
+        {
+            context.Questoes.Add(new Questao
+            {
+                Titulo = questao.Titulo,
+                Disciplina = questao.Disciplina,
+                Area = questao.Area,
+                Assuntos = questao.Assuntos,
+                Ano = questao.Ano,
+                Fonte = questao.Fonte,
+                Alternativas = questao.Alternativas.Select(a => new Alternativa
+                {
+                    Descricao = a.Descricao,
+                    Correta = a.Correta
+                }).ToList()
+            });
+        }
+
+        context.SaveChanges();
+    }
+
+    private class SeedData
+    {
+        public List<SeedTemaRedacao> TemasRedacao { get; set; } = new();
+        public List<SeedQuestao> Questoes { get; set; } = new();
+    }
+
+    private class SeedTemaRedacao
+    {
+        public string Titulo { get; set; } = string.Empty;
+        public string TextoMotivador { get; set; } = string.Empty;
+        public int? Ano { get; set; }
+        public string? Fonte { get; set; }
+    }
+
+    private class SeedQuestao
+    {
+        public string Titulo { get; set; } = string.Empty;
+        public string Area { get; set; } = string.Empty;
+        public string Disciplina { get; set; } = string.Empty;
+        public List<string> Assuntos { get; set; } = new();
+        public int? Ano { get; set; }
+        public string? Fonte { get; set; }
+        public List<SeedAlternativa> Alternativas { get; set; } = new();
+    }
+
+    private class SeedAlternativa
+    {
+        public string Descricao { get; set; } = string.Empty;
+        public bool Correta { get; set; }
     }
 }

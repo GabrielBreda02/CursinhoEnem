@@ -1,0 +1,73 @@
+{
+  "_comentario": "Acervo curado de questões reais do ENEM. Cada questão cita ano e fonte para atribuição correta. Para adicionar mais, basta incluir novos objetos seguindo este mesmo formato — não é preciso mexer em código, o DbSeeder lê este arquivo inteiro. Perguntas que originalmente dependiam de uma imagem essencial (charge, gráfico, mapa) e cuja imagem não pôde ser reproduzida aqui foram adaptadas incluindo o texto/dado essencial da imagem diretamente no enunciado, com isso citado na fonte.",
+  "temasRedacao": [
+    {
+      "titulo": "Caminhos para combater a intolerância religiosa no Brasil",
+      "textoMotivador": "TEXTO I - Em consonância com a Constituição da República Federativa do Brasil e com toda a legislação que assegura a liberdade de crença religiosa às pessoas, além de proteção e respeito às manifestações religiosas, a laicidade do Estado deve ser buscada, afastando a possibilidade de interferência de correntes religiosas em matérias sociais, políticas, culturais etc. (Disponível em: www.mprj.mp.br. Acesso em: 21 maio 2016, fragmento.)\n\nTEXTO II - O direito de criticar dogmas e encaminhamentos é assegurado como liberdade de expressão, mas atitudes agressivas, ofensas e tratamento diferenciado a alguém em função de crença ou de não ter religião são crimes inafiançáveis e imprescritíveis. (STECK, J. Intolerância religiosa é crime de ódio e fere a dignidade.)\n\nA partir da leitura dos textos motivadores e com base nos conhecimentos construídos ao longo de sua formação, redija um texto dissertativo-argumentativo em modalidade escrita formal da língua portuguesa sobre o tema \"Caminhos para combater a intolerância religiosa no Brasil\", apresentando proposta de intervenção que respeite os direitos humanos.",
+      "ano": 2016,
+      "fonte": "ENEM 2016 (1ª aplicação)"
+    }
+  ],
+  "questoes": [
+    {
+      "titulo": "Sobre o fim da escravidão no Brasil, considere os textos a seguir.\n\nTEXTO I - Em todo o país a lei de 13 de maio de 1888 libertou poucos negros em relação à população de cor. A maioria já havia conquistado a alforria antes de 1888, por meio de estratégias possíveis. No entanto, a importância histórica da lei de 1888 não pode ser mensurada apenas em termos numéricos. O impacto que a extinção da escravidão causou numa sociedade constituída a partir da legitimidade da propriedade sobre a pessoa não cabe em cifras.\n\nTEXTO II - Nos anos imediatamente anteriores à Abolição, a população livre do Rio de Janeiro se tornou mais numerosa e diversificada. Os escravos, bem menos numerosos que antes, e com os africanos mais aculturados, certamente não se distinguiam muito facilmente dos libertos e dos pretos e pardos livres habitantes da cidade. Também já não é razoável presumir que uma pessoa de cor seja provavelmente cativa, pois os negros libertos e livres poderiam ser encontrados em toda parte.\n\nO elemento destacado no Texto I que complementa os argumentos apresentados no Texto II é o(a)",
+      "area": "Linguagens, Códigos e suas Tecnologias",
+      "disciplina": "Interpretação de Texto",
+      "assuntos": ["Interpretação de texto", "História do Brasil"],
+      "ano": 2015,
+      "fonte": "ENEM 2015",
+      "alternativas": [
+        { "descricao": "variedade das estratégias de resistência dos cativos.", "correta": false },
+        { "descricao": "controle jurídico exercido pelos proprietários.", "correta": false },
+        { "descricao": "inovação social representada pela lei.", "correta": false },
+        { "descricao": "ineficácia prática da libertação.", "correta": false },
+        { "descricao": "significado político da Abolição.", "correta": true }
+      ]
+    },
+    {
+      "titulo": "No período de 1964 a 1985, durante o Regime Militar brasileiro, uma charge de Ziraldo (24/8/1974) retratava uma conversa de família lendo o jornal, com as falas: \"Só este ano já entraram no país três bilhões de dólares\" e \"O pagamento começa a ser feito daqui a dez anos\".\n\nA estratégia do Regime Militar abordada na charge foi caracterizada pela",
+      "area": "Ciências Humanas e suas Tecnologias",
+      "disciplina": "História",
+      "assuntos": ["Regime Militar", "Brasil República"],
+      "ano": 2015,
+      "fonte": "ENEM 2015 (adaptada de charge de Ziraldo — imagem original não reproduzida; texto essencial da charge incluído no enunciado)",
+      "alternativas": [
+        { "descricao": "priorização da segurança nacional.", "correta": false },
+        { "descricao": "captação de financiamentos estrangeiros.", "correta": true },
+        { "descricao": "execução de cortes nos gastos públicos.", "correta": false },
+        { "descricao": "nacionalização de empresas multinacionais.", "correta": false },
+        { "descricao": "promoção de políticas de distribuição de renda.", "correta": false }
+      ]
+    },
+    {
+      "titulo": "A vegetação apresenta adaptações ao ambiente, como as plantas arbóreas e arbustivas com raízes que se expandem horizontalmente, permitindo forte ancoragem no substrato lamacento; raízes que se expandem verticalmente, por causa da baixa oxigenação do substrato; folhas que têm glândulas para eliminar o excesso de sais; folhas que podem apresentar cutícula espessa para reduzir a perda de água por evaporação.\n\nAs características descritas referem-se a plantas adaptadas ao bioma:",
+      "area": "Ciências da Natureza e suas Tecnologias",
+      "disciplina": "Biologia",
+      "assuntos": ["Biomas brasileiros", "Adaptação vegetal"],
+      "ano": 2016,
+      "fonte": "ENEM 2016",
+      "alternativas": [
+        { "descricao": "Cerrado", "correta": false },
+        { "descricao": "Pampas", "correta": false },
+        { "descricao": "Pantanal", "correta": false },
+        { "descricao": "Manguezal", "correta": true },
+        { "descricao": "Mata de Cocais", "correta": false }
+      ]
+    },
+    {
+      "titulo": "Um cliente fez um orçamento com uma cozinheira para comprar 10 centos de quibe e 15 centos de coxinha e o valor total foi de R$ 680,00. Ao finalizar a encomenda, decidiu aumentar as quantidades de salgados e acabou comprando 20 centos de quibe e 30 centos de coxinha. Com isso, ele conseguiu um desconto de 10% no preço do cento do quibe e de 15% no preço do cento de coxinha, e o valor total da compra ficou em R$ 1.182,00.\n\nDe acordo com esses dados, qual foi o valor que o cliente pagou pelo cento da coxinha?",
+      "area": "Matemática e suas Tecnologias",
+      "disciplina": "Matemática",
+      "assuntos": ["Sistemas de equações", "Porcentagem"],
+      "ano": 2014,
+      "fonte": "ENEM 2014",
+      "alternativas": [
+        { "descricao": "R$ 23,40", "correta": false },
+        { "descricao": "R$ 23,80", "correta": true },
+        { "descricao": "R$ 24,90", "correta": false },
+        { "descricao": "R$ 25,30", "correta": false },
+        { "descricao": "R$ 37,80", "correta": false }
+      ]
+    }
+  ]
+}

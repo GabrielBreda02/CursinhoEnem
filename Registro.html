@@ -5,13 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Criar Conta</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="Estilo.css">
 </head>
 
 <body>
+  <div id="navbar"></div>
 
   <div class="container">
     <h1 class="titulo">Criar Conta</h1>
+    <p class="subtitulo">Leva menos de um minuto para começar.</p>
 
     <p id="mensagemErro" class="mensagem-erro" style="display:none;"></p>
 
@@ -38,13 +41,15 @@
 
       <div class="campo">
         <label>Eu sou</label>
-        <div class="alternativa">
-          <input type="radio" name="tipo" id="tipoAluno" value="Aluno" checked>
-          <label for="tipoAluno" style="font-weight:normal;margin:0;">Aluno — quero fazer simulados</label>
-        </div>
-        <div class="alternativa">
-          <input type="radio" name="tipo" id="tipoProfessor" value="Professor">
-          <label for="tipoProfessor" style="font-weight:normal;margin:0;">Professor — quero cadastrar questões e provas</label>
+        <div class="opcao-tipo">
+          <label for="tipoAluno">
+            <input type="radio" name="tipo" id="tipoAluno" value="Aluno" checked>
+            <span>Aluno — quero fazer simulados</span>
+          </label>
+          <label for="tipoProfessor">
+            <input type="radio" name="tipo" id="tipoProfessor" value="Professor">
+            <span>Professor — quero cadastrar questões e provas</span>
+          </label>
         </div>
       </div>
 

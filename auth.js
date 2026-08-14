@@ -67,3 +67,27 @@ function authFetch(url, options = {}) {
         return response;
     });
 }
+
+// Preenche a barra de navegação (marca + usuário/sair, ou link de login) em qualquer
+// página que tenha um <div id="navbar"></div>. Chamado automaticamente ao carregar a página.
+function renderNavbar() {
+    const el = document.getElementById("navbar");
+    if (!el) return;
+
+    el.innerHTML = estaLogado()
+        ? `<div class="navbar">
+             <a href="index.html" class="navbar-brand">CursinhoEnem</a>
+             <div class="navbar-user">
+               <span><strong>${getNomeUsuario()}</strong><span class="badge-tipo">${getTipoUsuario()}</span></span>
+               <button class="btn btn-ghost" onclick="logout()">Sair</button>
+             </div>
+           </div>`
+        : `<div class="navbar">
+             <a href="index.html" class="navbar-brand">CursinhoEnem</a>
+             <div class="navbar-user">
+               <a href="Login.html" class="btn btn-ghost">Entrar</a>
+             </div>
+           </div>`;
+}
+
+document.addEventListener("DOMContentLoaded", renderNavbar);

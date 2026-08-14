@@ -6,7 +6,8 @@ const params = new URLSearchParams(window.location.search);
 const tentativaId = params.get("id");
 
 const tituloProva = document.getElementById("tituloProva");
-const notaResumo = document.getElementById("notaResumo");
+const placarNumero = document.getElementById("placarNumero");
+const placarLegenda = document.getElementById("placarLegenda");
 const questoesResultado = document.getElementById("questoesResultado");
 const secaoRedacaoResultado = document.getElementById("secaoRedacaoResultado");
 const temaRedacaoResultado = document.getElementById("temaRedacaoResultado");
@@ -32,7 +33,8 @@ if (!tentativaId) {
 
 function renderizarResultado(dados) {
     tituloProva.textContent = dados.provaTitulo;
-    notaResumo.textContent = `Você acertou ${dados.notaObjetivas} de ${dados.totalQuestoes} questões objetivas.`;
+    placarNumero.textContent = `${dados.notaObjetivas} / ${dados.totalQuestoes}`;
+    placarLegenda.textContent = "questões objetivas corretas";
 
     questoesResultado.innerHTML = "";
     dados.questoes.forEach((questao, index) => {
@@ -55,8 +57,8 @@ function renderizarResultado(dados) {
         }).join("");
 
         const statusHtml = questao.respondidaCorretamente
-            ? '<span style="color:#155724;">(Correta)</span>'
-            : '<span style="color:#dc3545;">(Incorreta)</span>';
+            ? '<span class="status-correta">(Correta)</span>'
+            : '<span class="status-incorreta">(Incorreta)</span>';
 
         card.innerHTML = `
             <h4>${index + 1}. ${questao.titulo} ${statusHtml}</h4>

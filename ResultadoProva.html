@@ -5,26 +5,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultado da Prova</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="Estilo.css">
 </head>
 
 <body>
+    <div id="navbar"></div>
 
     <div class="container">
-        <h1 id="tituloProva">Resultado</h1>
-        <p id="notaResumo" class="titulo-tabela"></p>
+        <h1 id="tituloProva" class="titulo">Resultado</h1>
+
+        <div class="placar">
+            <div id="placarNumero" class="placar-numero">–</div>
+            <div id="placarLegenda" class="placar-legenda"></div>
+        </div>
 
         <div id="questoesResultado"></div>
 
         <div id="secaoRedacaoResultado" style="display:none;">
             <h2 style="margin-top:24px;">Sua Redação</h2>
             <p id="temaRedacaoResultado" class="titulo-tabela"></p>
-            <p id="textoRedacaoResultado" style="white-space:pre-wrap;background:#f9f9f9;padding:16px;border-radius:8px;"></p>
+            <p id="textoRedacaoResultado" style="white-space:pre-wrap;background:var(--bg);padding:16px;border-radius:var(--radius-sm);"></p>
         </div>
 
-        <div class="acoes" style="margin-top:20px;">
+        <div class="acoes" style="margin-top:20px;justify-content:center;">
             <button type="button" onclick="window.location.href='Historico.html'" class="btn">Meu Histórico</button>
-            <button type="button" onclick="window.location.href='index.html'" class="btn">Voltar ao Início</button>
+            <button type="button" onclick="window.location.href='index.html'" class="btn btn-ghost">Voltar ao Início</button>
         </div>
     </div>
 

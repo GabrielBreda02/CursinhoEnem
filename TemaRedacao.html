@@ -5,13 +5,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tema de Redação</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="Estilo.css">
 </head>
 
 <body>
+  <div id="navbar"></div>
 
   <div class="container">
-    <h1 id="tituloPagina">Novo Tema de Redação</h1>
+    <h1 id="tituloPagina" class="titulo">Novo Tema de Redação</h1>
 
     <form id="formTema">
       <div class="campo">
@@ -37,7 +39,7 @@
 
       <div class="acoes">
         <button type="button" onclick="salvarTema()" class="btn">Salvar</button>
-        <button type="button" onclick="window.location.href='TemasRedacao.html'" class="btn"> Cancelar</button>
+        <button type="button" onclick="window.location.href='TemasRedacao.html'" class="btn btn-ghost">Cancelar</button>
       </div>
     </form>
   </div>

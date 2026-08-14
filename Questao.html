@@ -5,13 +5,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro de Questão</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="Estilo.css">
 </head>
 
 <body>
+  <div id="navbar"></div>
 
   <div class="container">
-    <h1 id="tituloPagina">Nova Questão</h1>
+    <h1 id="tituloPagina" class="titulo">Nova Questão</h1>
 
     <form id="formQuestao">
 
@@ -68,7 +70,7 @@
 
       <div class="acoes">
         <button type="button" onclick="salvarQuestao()" class="btn">Salvar</button>
-        <button type="button" onclick="window.location.href='questoes.html'" class="btn"> Cancelar</button>
+        <button type="button" onclick="window.location.href='questoes.html'" class="btn btn-ghost">Cancelar</button>
       </div>
 
     </form>

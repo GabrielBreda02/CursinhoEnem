@@ -1,57 +1,160 @@
 /* ===============================
-   Estilo Global
+   CursinhoEnem — Design System
 ================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --primary-light: #eef2ff;
+    --accent: #f59e0b;
+    --accent-light: #fef3c7;
+    --success: #16a34a;
+    --success-light: #dcfce7;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --text: #1f2937;
+    --text-muted: #6b7280;
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --radius-lg: 16px;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
+    --shadow-hover: 0 4px 10px rgba(15, 23, 42, 0.08), 0 14px 32px rgba(15, 23, 42, 0.10);
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
 body {
-    background-color: #f4f4f4;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ===============================
+   Barra de navegação
+================================= */
+.navbar {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+}
+
+.navbar-brand::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: inline-block;
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.navbar-user strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.badge-tipo {
+    display: inline-block;
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-left: 6px;
+}
+
+.navbar .btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
 }
 
 /* Containers Gerais */
 .container {
     max-width: 800px;
-    margin: 40px auto;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 16px auto 48px auto;
+    background-color: var(--surface);
+    padding: 36px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
     text-align: center;
 }
 
 /* Títulos */
-h1,
-h4,
+h1, h2, h4,
 .titulo,
 .card-title {
-    color: #333;
+    color: var(--text);
     margin-bottom: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+h2 {
+    font-size: 1.4rem;
 }
 
 .titulo {
-    font-size: 2.5rem;
-    color: #0a9fe4;
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--primary-dark);
     position: relative;
-    padding-bottom: 10px;
+    padding-bottom: 14px;
 }
 
 .titulo::after {
     content: "";
-    width: 60px;
+    width: 56px;
     height: 4px;
-    background-color: #007bff;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
     display: block;
-    margin: 10px auto 0 auto;
+    margin: 12px auto 0 auto;
     border-radius: 2px;
 }
 
 .card-title {
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+.subtitulo {
+    color: var(--text-muted);
+    margin-top: -12px;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
 }
 
 /* ===============================
@@ -60,30 +163,58 @@ h4,
 .botao-link,
 button,
 .btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #007bff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 26px;
+    background-color: var(--primary);
     color: white;
     border: none;
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.98rem;
+    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
 .botao-link:hover,
 button:hover,
 .btn:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-dark);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.28);
+    transform: translateY(-1px);
+}
+
+.botao-link:active,
+button:active,
+.btn:active {
+    transform: translateY(0);
 }
 
 .btn-danger {
-    background-color: #dc3545;
+    background-color: var(--danger);
 }
 
 .btn-danger:hover {
-    background-color: #bb2d3b;
+    background-color: #b91c1c;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.28);
+}
+
+.btn-ghost {
+    background-color: transparent;
+    color: var(--text-muted);
+    box-shadow: none;
+    border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+    background-color: var(--bg);
+    color: var(--text);
+    box-shadow: none;
+    transform: none;
 }
 
 /* ===============================
@@ -94,34 +225,42 @@ form {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    text-align: left;
 }
 
 label,
 .form-label {
     font-weight: 600;
-    color: #444;
+    color: var(--text);
     margin-bottom: 6px;
     display: block;
+    font-size: 0.92rem;
 }
 
 input[type="text"],
+input[type="password"],
 input[type="number"],
+input[type="file"],
 textarea,
 select {
     width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
     font-size: 1rem;
-    transition: border-color 0.3s ease;
+    color: var(--text);
+    background-color: var(--surface);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input[type="text"]:focus,
+input[type="password"]:focus,
 input[type="number"]:focus,
 textarea:focus,
 select:focus {
-    border-color: #007bff;
+    border-color: var(--primary);
     outline: none;
+    box-shadow: 0 0 0 4px var(--primary-light);
 }
 
 textarea {
@@ -138,6 +277,53 @@ textarea {
     gap: 15px;
 }
 
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.menu-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    text-align: left;
+    background-color: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    box-shadow: none;
+}
+
+.menu-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary);
+    background-color: var(--surface);
+}
+
+.menu-card .menu-card-icone {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    margin-bottom: 6px;
+}
+
+.menu-card strong {
+    font-size: 1.05rem;
+    color: var(--text);
+}
+
+.menu-card span {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
 .user-bar {
     display: flex;
     justify-content: flex-end;
@@ -145,7 +331,7 @@ textarea {
     gap: 10px;
     margin-bottom: 20px;
     font-size: 0.9rem;
-    color: #555;
+    color: var(--text-muted);
 }
 
 .user-bar .btn {
@@ -157,62 +343,149 @@ textarea {
    Login / Registro
 ================================= */
 .mensagem-erro {
-    color: #dc3545;
-    background-color: #f8d7da;
-    border-radius: 8px;
-    padding: 10px 14px;
+    color: #991b1b;
+    background-color: var(--danger-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
     margin-bottom: 16px;
+    font-size: 0.92rem;
+    text-align: left;
 }
 
 .mensagem-sucesso {
-    color: #155724;
-    background-color: #d4edda;
-    border-radius: 8px;
-    padding: 10px 14px;
+    color: #14532d;
+    background-color: var(--success-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
     margin-bottom: 16px;
+    font-size: 0.92rem;
+    text-align: left;
+}
+
+.opcao-tipo {
+    display: flex;
+    gap: 10px;
+}
+
+.opcao-tipo label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.opcao-tipo input[type="radio"] {
+    accent-color: var(--primary);
+}
+
+.opcao-tipo input[type="radio"]:checked + span,
+.opcao-tipo:has(input[type="radio"]:checked) {
+    color: var(--primary-dark);
+}
+
+.opcao-tipo label:has(input[type="radio"]:checked) {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
 }
 
 /* ===============================
    Timer da prova (FazerProva.html)
 ================================= */
+.prova-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.prova-header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+}
+
 .timer-badge {
     position: sticky;
     top: 10px;
-    float: right;
-    background-color: #007bff;
+    flex-shrink: 0;
+    background-color: var(--primary);
     color: white;
-    font-size: 1.3rem;
-    font-weight: bold;
-    padding: 8px 18px;
-    border-radius: 50px;
-    margin-bottom: 10px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 10px 20px;
+    border-radius: 999px;
     z-index: 10;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.28);
 }
 
 .timer-badge.timer-alerta {
-    background-color: #dc3545;
+    background-color: var(--danger);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.32);
     animation: pulsar 1s infinite;
 }
 
 @keyframes pulsar {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    50% { opacity: 0.65; }
 }
 
 /* ===============================
    Resultado da prova (ResultadoProva.html)
 ================================= */
+.placar {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.placar .placar-numero {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.placar .placar-legenda {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
 .alternativa-correta {
-    background-color: #d4edda;
-    border-radius: 6px;
-    padding: 6px 10px;
+    background-color: var(--success-light);
+    color: #14532d;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
     font-weight: 600;
+    border: 1px solid #bbf7d0;
 }
 
 .alternativa-selecionada-errada {
-    background-color: #f8d7da;
-    border-radius: 6px;
-    padding: 6px 10px;
+    background-color: var(--danger-light);
+    color: #991b1b;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    border: 1px solid #fecaca;
+}
+
+.status-correta {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.status-incorreta {
+    color: var(--danger);
+    font-weight: 700;
 }
 
 /* ===============================
@@ -228,21 +501,51 @@ textarea {
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.alternativa:has(input[type="radio"]:checked) {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+}
+
+.alternativa input[type="text"] {
+    border: none;
+    padding: 4px 6px;
+}
+
+.alternativa input[type="text"]:focus {
+    box-shadow: none;
 }
 
 input[type="radio"] {
     transform: scale(1.2);
-    accent-color: #007bff;
+    accent-color: var(--primary);
+}
+
+.badge-area {
+    display: inline-block;
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
 }
 
 /* ===============================
    Gerador de Provas (provas.html)
 ================================= */
 .card {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    background-color: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: none;
+    padding: 26px;
     margin-bottom: 20px;
     text-align: left;
 }
@@ -253,12 +556,25 @@ input[type="radio"] {
     flex-wrap: wrap;
 }
 
+.row > .campo,
+.row > .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
 .question-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
     margin-top: 12px;
-    background-color: #f9f9f9;
+    background-color: var(--surface);
+    text-align: left;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.question-card:hover {
+    box-shadow: var(--shadow);
+    border-color: #d1d5db;
 }
 
 .question-header {
@@ -273,6 +589,68 @@ ul {
 
 li {
     margin-bottom: 4px;
+}
+
+/* Lista genérica usada em várias telas de listagem */
+.lista {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+.acoes {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ===============================
+   Tabelas de Questões (Disponíveis e Selecionadas)
+================================= */
+.tabela-questoes {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 16px;
+}
+
+.tabela-questoes thead {
+    background-color: var(--primary);
+    color: white;
+}
+
+.tabela-questoes th,
+.tabela-questoes td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.tabela-questoes tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabela-questoes tbody tr:hover {
+    background-color: var(--primary-light);
+    transition: background-color 0.15s ease;
+}
+
+.titulo-tabela {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border-left: 4px solid var(--primary);
+    margin-top: 24px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    text-align: left;
 }
 
 /* ===============================
@@ -303,7 +681,7 @@ input[type="checkbox"][role="switch"]::before {
 }
 
 input[type="checkbox"][role="switch"]:checked {
-    background-color: #fd0d7d;
+    background-color: var(--primary);
 }
 
 input[type="checkbox"][role="switch"]:checked::before {
@@ -316,93 +694,22 @@ input[type="checkbox"][role="switch"]:checked::before {
 @media (max-width: 600px) {
     .container {
         padding: 20px;
+        border-radius: var(--radius);
+    }
+
+    .navbar {
+        padding: 12px 16px;
     }
 
     .titulo {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .row {
         flex-direction: column;
     }
 
-    /* ===============================
-              questoes.html
-       ================================= */
-    .lista {
-        margin-top: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
+    .placar .placar-numero {
+        font-size: 1.9rem;
     }
-
-    .question-card {
-        background-color: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .question-card h3 {
-        margin-bottom: 8px;
-    }
-
-    .acoes {
-        margin-top: 12px;
-        display: flex;
-        gap: 10px;
-    }
-
-    /* ===============================
-   Tabelas de Questões (Disponíveis e Selecionadas)
-================================= */
-    .tabela-questoes {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: #fff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-        margin-top: 16px;
-    }
-
-    .tabela-questoes thead {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .tabela-questoes th,
-    .tabela-questoes td {
-        padding: 12px 16px;
-        text-align: left;
-        border-bottom: 1px solid #eee;
-    }
-
-    .tabela-questoes tbody tr:hover {
-        background-color: #f5faff;
-        transition: background-color 0.2s ease;
-    }
-
-    .tabela-questoes th:first-child,
-    .tabela-questoes td:first-child {
-        border-left: none;
-    }
-
-    .tabela-questoes th:last-child,
-    .tabela-questoes td:last-child {
-        border-right: none;
-    }
-
-    .titulo-tabela {
-        background-color: #f7f9fc;
-        padding: 8px 12px;
-        border-radius: 8px;
-        border-left: 5px solid #007bff;
-        margin-top: 24px;
-        font-weight: bold;
-        color: #333;
-    }
-
-
-
 }

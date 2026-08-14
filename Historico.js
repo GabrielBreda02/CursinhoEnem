@@ -22,9 +22,9 @@ authFetch(`${API_BASE}/tentativas/minhas`)
             const finalizada = !!tentativa.finalizadoEm;
 
             const statusHtml = finalizada
-                ? `<p><strong>Nota:</strong> ${tentativa.notaObjetivas} de ${tentativa.totalQuestoes} questões</p>
+                ? `<p><strong>Nota:</strong> <span class="status-correta">${tentativa.notaObjetivas} de ${tentativa.totalQuestoes}</span> questões</p>
                    <div class="acoes"><a class="btn" href="ResultadoProva.html?id=${tentativa.idTentativa}">Ver Resultado</a></div>`
-                : `<p><strong>Status:</strong> Em andamento (não finalizada)</p>`;
+                : `<p><strong>Status:</strong> <span class="badge-tipo">Em andamento</span></p>`;
 
             card.innerHTML = `
                 <h3>${tentativa.provaTitulo}</h3>

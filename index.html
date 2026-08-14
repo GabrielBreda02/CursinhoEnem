@@ -5,41 +5,70 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CursinhoEnem</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="Estilo.css" />
 </head>
 
 <body>
-  <div class="container">
-    <div id="userBar" class="user-bar"></div>
+  <div id="navbar"></div>
 
+  <div class="container">
     <h1 class="titulo">CursinhoEnem</h1>
-    <div id="menuPrincipal" class="button-group"></div>
+    <p id="subtitulo" class="subtitulo">Simulados de ENEM com tempo cronometrado e redação, do jeito que cai na prova.</p>
+
+    <div id="menuPrincipal" class="menu-grid"></div>
   </div>
 
   <script src="auth.js"></script>
   <script>
-    const userBar = document.getElementById("userBar");
-    userBar.innerHTML = estaLogado()
-      ? `<span>Olá, ${getNomeUsuario()} (${getTipoUsuario()})</span> <button class="btn" onclick="logout()">Sair</button>`
-      : `<span>Você não está logado</span> <a class="btn" href="Login.html">Entrar</a>`;
-
     const menuPrincipal = document.getElementById("menuPrincipal");
+    const subtitulo = document.getElementById("subtitulo");
+
     if (ehProfessor()) {
+      subtitulo.textContent = "Monte seu banco de questões, temas de redação e provas para os alunos.";
       menuPrincipal.innerHTML = `
-        <a href="Questoes.html" class="botao-link">Cadastrar Questões</a>
-        <a href="Provas.html" class="botao-link">Gerar Provas</a>
-        <a href="TemasRedacao.html" class="botao-link">Temas de Redação</a>
+        <a href="Questoes.html" class="menu-card">
+          <div class="menu-card-icone"></div>
+          <strong>Cadastrar Questões</strong>
+          <span>Monte o banco de questões por área do ENEM</span>
+        </a>
+        <a href="Provas.html" class="menu-card">
+          <div class="menu-card-icone"></div>
+          <strong>Gerar Provas</strong>
+          <span>Combine questões, tempo limite e redação</span>
+        </a>
+        <a href="TemasRedacao.html" class="menu-card">
+          <div class="menu-card-icone"></div>
+          <strong>Temas de Redação</strong>
+          <span>Cadastre temas e textos motivadores</span>
+        </a>
       `;
     } else if (ehAluno()) {
+      subtitulo.textContent = "Escolha um simulado e comece a treinar com tempo real de prova.";
       menuPrincipal.innerHTML = `
-        <a href="SelecionarProva.html" class="botao-link">Fazer uma Prova</a>
-        <a href="Historico.html" class="botao-link">Meu Histórico</a>
+        <a href="SelecionarProva.html" class="menu-card">
+          <div class="menu-card-icone"></div>
+          <strong>Fazer uma Prova</strong>
+          <span>Simulados com cronômetro e redação</span>
+        </a>
+        <a href="Historico.html" class="menu-card">
+          <div class="menu-card-icone"></div>
+          <strong>Meu Histórico</strong>
+          <span>Veja suas notas e resultados anteriores</span>
+        </a>
       `;
     } else {
       menuPrincipal.innerHTML = `
-        <p>Entre ou cadastre-se para acessar o sistema.</p>
-        <a href="Login.html" class="botao-link">Entrar</a>
-        <a href="Registro.html" class="botao-link">Cadastre-se</a>
+        <a href="Login.html" class="menu-card">
+          <div class="menu-card-icone"></div>
+          <strong>Entrar</strong>
+          <span>Já tenho uma conta</span>
+        </a>
+        <a href="Registro.html" class="menu-card">
+          <div class="menu-card-icone"></div>
+          <strong>Cadastre-se</strong>
+          <span>Sou aluno ou professor e quero começar</span>
+        </a>
       `;
     }
   </script>

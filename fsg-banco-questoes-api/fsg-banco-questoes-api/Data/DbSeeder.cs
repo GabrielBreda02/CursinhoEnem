@@ -15,6 +15,7 @@ public static class DbSeeder
     {
         SeedUsuarios(context);
         SeedEnem(context);
+        SeedProvaExemplo(context);
     }
 
     private static void SeedUsuarios(BancoQuestoesContext context)
@@ -95,6 +96,33 @@ public static class DbSeeder
                 }).ToList()
             });
         }
+
+        context.SaveChanges();
+    }
+
+    private static void SeedProvaExemplo(BancoQuestoesContext context)
+    {
+        if (context.Provas.Any())
+        {
+            return;
+        }
+
+        var questoes = context.Questoes.ToList();
+        if (questoes.Count == 0)
+        {
+            return;
+        }
+
+        var tema = context.TemasRedacao.FirstOrDefault();
+
+        context.Provas.Add(new Prova
+        {
+            Titulo = "Simulado de exemplo — uma questão de cada área",
+            Disciplina = "Geral",
+            TempoLimiteMinutos = 60,
+            TemaRedacaoId = tema?.IdTemaRedacao,
+            Questoes = questoes
+        });
 
         context.SaveChanges();
     }

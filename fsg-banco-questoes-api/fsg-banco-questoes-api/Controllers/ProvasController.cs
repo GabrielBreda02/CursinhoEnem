@@ -108,7 +108,7 @@ public class ProvasController : ControllerBase
     /// <param name="request">Dados da prova a ser criada</param>
     /// <returns>ID da prova criada</returns>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Professor")]
     [ProducesResponseType(typeof(CreatedResponse), 201)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
     public async Task<ActionResult<CreatedResponse>> CreateProva([FromBody] CreateProvaRequest request)
@@ -180,7 +180,7 @@ public class ProvasController : ControllerBase
     /// <param name="request">Novos dados da prova</param>
     /// <returns>Resultado da operação</returns>
     [HttpPut("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = "Professor")]
     [ProducesResponseType(typeof(ApiResponse), 200)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
@@ -258,7 +258,7 @@ public class ProvasController : ControllerBase
     /// <param name="id">ID da prova a ser removida</param>
     /// <returns>Resultado da operação</returns>
     [HttpDelete("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = "Professor")]
     [ProducesResponseType(typeof(ApiResponse), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     public async Task<ActionResult<ApiResponse>> DeleteProva(int id)

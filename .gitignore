@@ -13,5 +13,8 @@
 # Configuração local do Claude Code (preview/testes)
 .claude/
 
+# Imagens enviadas pelos professores (conteúdo gerado, não versionado)
+fsg-banco-questoes-api/fsg-banco-questoes-api/wwwroot/uploads/
+
 # Pacote zip antigo
 fsg-banco-questoes-api.zip

@@ -13,11 +13,64 @@ namespace BancoQuestoes.Api.Controllers;
 [Produces("application/json")]
 public class QuestoesController : ControllerBase
 {
-    private readonly BancoQuestoesContext _context;
+    private static readonly string[] ExtensoesPermitidas = { ".jpg", ".jpeg", ".png", ".webp" };
+    private const long TamanhoMaximoBytes = 5 * 1024 * 1024; // 5 MB
 
-    public QuestoesController(BancoQuestoesContext context)
+    private readonly BancoQuestoesContext _context;
+    private readonly IWebHostEnvironment _ambiente;
+
+    public QuestoesController(BancoQuestoesContext context, IWebHostEnvironment ambiente)
     {
         _context = context;
+        _ambiente = ambiente;
+    }
+
+    /// <summary>
+    /// Faz upload de uma imagem para usar no enunciado de uma questão (gráficos, tirinhas, mapas etc.)
+    /// </summary>
+    /// <param name="arquivo">Arquivo de imagem (jpg, jpeg, png ou webp; até 5 MB)</param>
+    /// <returns>URL relativa da imagem salva, para usar em ImagemUrl</returns>
+    [HttpPost("upload-imagem")]
+    [Authorize(Roles = "Professor")]
+    [ProducesResponseType(typeof(UploadImagemResponse), 201)]
+    [ProducesResponseType(typeof(ApiResponse), 400)]
+    public async Task<ActionResult<UploadImagemResponse>> UploadImagem(IFormFile? arquivo)
+    {
+        if (arquivo == null || arquivo.Length == 0)
+        {
+            return BadRequest(new ApiResponse { Message = "Nenhum arquivo enviado", Success = false });
+        }
+
+        if (arquivo.Length > TamanhoMaximoBytes)
+        {
+            return BadRequest(new ApiResponse { Message = "A imagem deve ter no máximo 5 MB", Success = false });
+        }
+
+        var extensao = Path.GetExtension(arquivo.FileName).ToLowerInvariant();
+        if (!ExtensoesPermitidas.Contains(extensao))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Message = "Formato inválido. Envie um arquivo .jpg, .jpeg, .png ou .webp",
+                Success = false
+            });
+        }
+
+        var pastaUploads = Path.Combine(_ambiente.WebRootPath, "uploads", "questoes");
+        Directory.CreateDirectory(pastaUploads);
+
+        var nomeArquivo = $"{Guid.NewGuid()}{extensao}";
+        var caminhoCompleto = Path.Combine(pastaUploads, nomeArquivo);
+
+        using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+        {
+            await arquivo.CopyToAsync(stream);
+        }
+
+        return Created(string.Empty, new UploadImagemResponse
+        {
+            ImagemUrl = $"/uploads/questoes/{nomeArquivo}"
+        });
     }
 
     /// <summary>
@@ -118,7 +171,7 @@ public class QuestoesController : ControllerBase
     /// <param name="request">Dados da questão a ser criada</param>
     /// <returns>ID da questão criada</returns>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Professor")]
     [ProducesResponseType(typeof(CreatedResponse), 201)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
     public async Task<ActionResult<CreatedResponse>> CreateQuestao([FromBody] CreateQuestaoRequest request)
@@ -186,7 +239,7 @@ public class QuestoesController : ControllerBase
     /// <param name="request">Novos dados da questão</param>
     /// <returns>Resultado da operação</returns>
     [HttpPut("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = "Professor")]
     [ProducesResponseType(typeof(ApiResponse), 200)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
@@ -266,7 +319,7 @@ public class QuestoesController : ControllerBase
     /// <param name="id">ID da questão a ser removida</param>
     /// <returns>Resultado da operação</returns>
     [HttpDelete("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = "Professor")]
     [ProducesResponseType(typeof(ApiResponse), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     public async Task<ActionResult<ApiResponse>> DeleteQuestao(int id)

@@ -6,7 +6,14 @@ using Microsoft.OpenApi.Models;
 using BancoQuestoes.Api.Data;
 using BancoQuestoes.Api.Security;
 
-var builder = WebApplication.CreateBuilder(args);
+// Este projeto começou como API pura (sem wwwroot), então precisamos declarar o WebRootPath
+// explicitamente aqui — se não, o provedor de arquivos estáticos é montado como nulo e
+// app.UseStaticFiles() nunca encontra os uploads, mesmo criando a pasta depois.
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    WebRootPath = "wwwroot"
+});
 
 // Adicionar serviços necessários para Controllers
 builder.Services.AddControllers()
@@ -101,6 +108,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Garantir que a pasta de uploads exista (o middleware de arquivos estáticos não cria sozinho)
+Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "questoes"));
+
 // Configurar pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
@@ -117,6 +127,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // serve /uploads/questoes/... (imagens dos enunciados)
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

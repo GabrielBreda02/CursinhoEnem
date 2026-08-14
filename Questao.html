@@ -16,6 +16,16 @@
     <form id="formQuestao">
 
       <div class="campo">
+        <label>Área de conhecimento (ENEM)</label>
+        <select id="area">
+          <option value="Linguagens, Códigos e suas Tecnologias">Linguagens, Códigos e suas Tecnologias</option>
+          <option value="Ciências Humanas e suas Tecnologias">Ciências Humanas e suas Tecnologias</option>
+          <option value="Ciências da Natureza e suas Tecnologias">Ciências da Natureza e suas Tecnologias</option>
+          <option value="Matemática e suas Tecnologias">Matemática e suas Tecnologias</option>
+        </select>
+      </div>
+
+      <div class="campo">
         <label>Disciplina ( sem abreviação)</label>
         <input type="text" id="disciplina" placeholder="Ex.: Programação Web">
       </div>
@@ -25,9 +35,27 @@
         <input type="text" id="assuntos" placeholder="Ex.: HTML, CSS, JavaScript">
       </div>
 
+      <div class="row">
+        <div class="campo">
+          <label>Ano do ENEM (se a questão vier de uma prova real)</label>
+          <input type="number" id="ano" placeholder="Ex.: 2019">
+        </div>
+        <div class="campo">
+          <label>Fonte</label>
+          <input type="text" id="fonte" placeholder="Ex.: ENEM 2019 ou Autoral">
+        </div>
+      </div>
+
       <div class="campo">
         <label>Título ( enunciado ) </label>
         <textarea id="titulo" placeholder="Digite o enunciado completo da questão..."></textarea>
+      </div>
+
+      <div class="campo">
+        <label>Imagem do enunciado (opcional — gráfico, tirinha, mapa etc.)</label>
+        <input type="file" id="imagemArquivo" accept=".jpg,.jpeg,.png,.webp">
+        <p id="imagemStatus" style="margin-top:8px;"></p>
+        <img id="imagemPreview" style="display:none;max-width:100%;border-radius:8px;margin-top:8px;">
       </div>
 
       <div class="campo">

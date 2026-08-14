@@ -34,6 +34,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão de teste",
             Disciplina = "Matemática",
+            Area = AreaConhecimento.Matematica,
             Assuntos = ["Álgebra"],
             Alternativas = 
             [
@@ -93,6 +94,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão de teste",
             Disciplina = "História",
+            Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Brasil"],
             Alternativas = 
             [
@@ -148,6 +150,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão 1",
             Disciplina = "Física",
+            Area = AreaConhecimento.CienciasNatureza,
             Assuntos = ["Mecânica"],
             Alternativas = 
             [
@@ -160,6 +163,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão 2",
             Disciplina = "Física",
+            Area = AreaConhecimento.CienciasNatureza,
             Assuntos = ["Eletricidade"],
             Alternativas = 
             [
@@ -210,6 +214,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão para prova que será deletada",
             Disciplina = "Química",
+            Area = AreaConhecimento.CienciasNatureza,
             Assuntos = ["Átomos"],
             Alternativas = 
             [
@@ -250,6 +255,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão 1",
             Disciplina = "Geografia",
+            Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Continentes"],
             Alternativas = 
             [
@@ -262,6 +268,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão 2",
             Disciplina = "Geografia",
+            Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Países"],
             Alternativas = 
             [

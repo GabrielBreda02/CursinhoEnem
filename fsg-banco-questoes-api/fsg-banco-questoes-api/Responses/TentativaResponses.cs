@@ -28,6 +28,15 @@ public class TentativaIniciadaResponse
     public string? TemaRedacaoTitulo { get; set; }
     public string? TemaRedacaoTexto { get; set; }
     public List<QuestaoProvaResponse> Questoes { get; set; } = new();
+
+    /// <summary>Respostas já salvas, quando essa tentativa retoma uma prova em andamento.</summary>
+    public List<RespostaSalvaResponse> RespostasSalvas { get; set; } = new();
+}
+
+public class RespostaSalvaResponse
+{
+    public int QuestaoId { get; set; }
+    public int AlternativaId { get; set; }
 }
 
 public class FinalizarTentativaResponse
@@ -65,6 +74,8 @@ public class ResultadoTentativaResponse
     public int TotalQuestoes { get; set; }
     public string? TextoRedacao { get; set; }
     public string? TemaRedacaoTitulo { get; set; }
+    public int? NotaRedacao { get; set; }
+    public string? ComentarioRedacao { get; set; }
     public List<QuestaoResultadoResponse> Questoes { get; set; } = new();
 }
 

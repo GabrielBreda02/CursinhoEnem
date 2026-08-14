@@ -1,0 +1,178 @@
+# Status do Projeto — CursinhoEnem
+
+> Documento de continuidade. Cole isso como primeira mensagem de um chat novo (ou peça pra
+> ler este arquivo) pra retomar o trabalho de onde parou.
+
+## Contexto
+
+Trabalho da faculdade (disciplina de Análise e Desenvolvimento de Sistemas). Começou como um
+CRUD genérico de banco de questões/provas
+(`GabrielBreda02/Sistema-Web-de-Banco-de-Questoes-e-Composicao-de-Provas`, com autenticação
+JWT já adicionada). A orientadora — que também é "cliente" do projeto nessa disciplina — achou
+o projeto genérico pouco diferenciado e sugeriu um pivô: uma **plataforma de simulados para
+quem estuda pro ENEM** (cursinhos ou alunos por conta própria), com timer, redação, upload de
+imagem nas questões e um acervo de questões reais do ENEM.
+
+Decisão tomada: manter o repositório original intocado (representa a entrega já feita) e criar
+um **repositório novo** para o produto evoluído.
+
+- **Repositório atual/ativo:** https://github.com/GabrielBreda02/CursinhoEnem
+- **Pasta local:** `../CursinhoEnem` (irmã da pasta do projeto original — mesma "Área de
+  Trabalho")
+- **Repositório antigo (não mexer mais):**
+  `GabrielBreda02/Sistema-Web-de-Banco-de-Questoes-e-Composicao-de-Provas`
+
+## Stack técnica
+
+- **Back-end:** ASP.NET Core 8 (C#), Entity Framework Core + SQLite, em
+  `fsg-banco-questoes-api/fsg-banco-questoes-api/` dentro do repo CursinhoEnem
+- **Front-end:** HTML + CSS + JavaScript puro, sem framework e sem build step, na raiz do repo
+- **Autenticação:** JWT (com claim de role Professor/Aluno) + hash de senha PBKDF2
+- **Banco:** SQLite, criado automaticamente ao rodar a API (sem migrations, usa
+  `EnsureCreated()`)
+
+### Como rodar localmente
+
+```bash
+# API (porta 5000)
+cd fsg-banco-questoes-api/fsg-banco-questoes-api
+dotnet run --project BancoQuestoes.Api.csproj
+
+# Front-end — servir a raiz do repo como arquivos estáticos, ex.:
+python -m http.server 8080
+# depois abrir http://localhost:8080/index.html
+```
+
+O `.csproj` já tem `<RollForward>LatestMajor</RollForward>`, então roda mesmo se só tiver um
+.NET mais novo instalado (sem precisar do runtime 8.0 exato).
+
+### Credenciais de teste (criadas automaticamente no primeiro run)
+
+| Papel | E-mail | Senha |
+|---|---|---|
+| Professor | professor@teste.com | senha123 |
+| Aluno | aluno@teste.com | senha123 |
+
+Também já vem com 539 questões reais do ENEM (2015-2016 curadas + 2022-2024 em massa), 1 tema
+de redação e 1 prova de exemplo montada (1 questão de cada área).
+
+## O que já foi construído (todo o essencial está pronto e testado)
+
+1. **Papéis Professor/Aluno** — `Usuario.Tipo`, claim de role no JWT,
+   `[Authorize(Roles = "Professor")]` nos endpoints de escrita de questões/provas/temas
+2. **Upload de imagem nas questões** — `POST /api/questoes/upload-imagem`, salva em
+   `wwwroot/uploads/questoes/`, só Professor, valida tipo/tamanho
+3. **Temas de Redação** — CRUD completo (`TemasRedacaoController`), associável a uma prova
+4. **Fluxo do aluno fazendo prova** (`TentativasController`, tudo `[Authorize(Roles = "Aluno")]`):
+   - `POST /api/tentativas/iniciar` — cria a tentativa, prazo (`ExpiraEm`) calculado **no
+     servidor**, devolve as questões **sem revelar o gabarito**
+   - `PUT /api/tentativas/{id}/respostas` — salva resposta por questão, valida dono/prazo/não
+     finalizada
+   - `POST /api/tentativas/{id}/finalizar` — salva redação, calcula nota
+   - `GET /api/tentativas/{id}` — resultado (só depois de finalizada)
+   - `GET /api/tentativas/minhas` — histórico
+   - Telas: `SelecionarProva.html`, `FazerProva.html` (timer visual sincronizado com o prazo do
+     servidor), `ResultadoProva.html`, `Historico.html`
+5. **Acervo curado do ENEM** — `Data/Seed/questoes_enem.json`: 4 questões reais (uma por área,
+   com ano/fonte citados) + 1 tema de redação oficial (ENEM 2016). `DbSeeder.cs` lê esse
+   arquivo — pra adicionar mais conteúdo depois, é só incluir mais entradas no JSON seguindo o
+   mesmo formato, sem mexer em código
+6. **Repaginação visual completa** — design system em `Estilo.css` (paleta índigo/âmbar,
+   tipografia Inter), navbar consistente em todas as páginas (`auth.js: renderNavbar()`), menu
+   principal em cards, favicon
+7. **Suíte de testes automatizados corrigida** — `BancoQuestoes.Tests` compila e os 16 testes
+   passam (`dotnet test BancoQuestoes.Tests.csproj`, ver observações técnicas abaixo)
+8. **Correção de redação pelo professor** — `TentativaProva.NotaRedacao`/`ComentarioRedacao`,
+   `RedacoesController` (`api/redacoes`, `[Authorize(Roles = "Professor")]`), telas
+   `Redacoes.html` (lista) e `CorrigirRedacao.html` (nota 0-1000 + comentário); o aluno vê a
+   correção em `ResultadoProva.html` assim que o professor salva
+9. **Retomar prova em andamento** — `POST /api/tentativas/iniciar` agora reaproveita a
+   tentativa não finalizada do aluno pra aquela prova (se ainda dentro do prazo) em vez de criar
+   outra; se o prazo já passou sem finalizar, fecha ela automaticamente antes de abrir uma nova.
+   `Historico.html` ganhou botão "Continuar Prova" pra esse caso
+10. **Acervo do ENEM ampliado pra 539 questões** — as 4 originais (curadas manualmente) + 535
+    novas de 2022, 2023 e 2024 (180 cada, menos as anuladas oficialmente pelo INEP e 2 com dado
+    corrompido na fonte), importadas do dataset aberto `maritaca-ai/enem` (Hugging Face, Apache
+    2.0). 142 delas têm imagem (gráfico/mapa/charge/tirinha) — baixadas e comitadas em
+    `Data/Seed/Imagens/`, servidas pela API na rota `/seed-images` (ver observações técnicas).
+    `DbSeeder.SeedProvaExemplo` foi ajustado pra pegar só 1 questão por área na prova de exemplo,
+    já que antes pegava a tabela inteira
+
+Todas as fases foram testadas por `curl`/script Python e pelo navegador (fluxo completo dos
+dois papéis) antes de cada commit.
+
+## Observações técnicas (aprendidas corrigindo a suíte de testes)
+
+- **`BancoQuestoes.Tests.csproj` e `BancoQuestoes.Api.csproj` ficam na mesma pasta e
+  compartilham `bin`/`obj`.** Rodar `dotnet build BancoQuestoes.Api.csproj` sozinho e depois
+  `dotnet test BancoQuestoes.Tests.csproj` deixa esses intermediários num estado que confunde o
+  build do projeto de testes (some referência ao Xunit). Fluxo confiável: restaurar e testar o
+  projeto de testes de uma vez só, sem builds separados do projeto da API no meio —
+  `dotnet restore BancoQuestoes.Tests.csproj && dotnet test BancoQuestoes.Tests.csproj --no-restore`.
+- **`testhost.exe` (do pacote de testes) não tem o `RollForward` que o `Api.csproj` tem** — se
+  só houver um .NET mais novo instalado (sem o runtime 8.0 exato), rodar os testes precisa de
+  `DOTNET_ROLL_FORWARD=LatestMajor` no ambiente:
+  `DOTNET_ROLL_FORWARD=LatestMajor dotnet test BancoQuestoes.Tests.csproj`.
+- **SQLite não guarda o `Kind` do `DateTime`.** Sem conversores explícitos, todo `DateTime` lido
+  de volta do banco (fora do objeto recém-criado em memória) volta como `Unspecified`, o que
+  fazia o JSON perder o sufixo `Z` e o navegador ler a data como horário local em vez de UTC —
+  bug real encontrado testando "retomar prova" (o timer pulava ~3h). Corrigido com
+  `ConfigureConventions` em `BancoQuestoesContext.cs` forçando `DateTimeKind.Utc` na leitura.
+
+## Observações técnicas (aprendidas ampliando o acervo do ENEM)
+
+- **`wwwroot/uploads/` é gitignored de propósito** (uploads de verdade feitos pelo professor não
+  devem ir pro repo) — mas isso significa que imagens de **seed** não podem morar lá, ou ninguém
+  mais consegue rodar o projeto com elas. Por isso as 142 imagens do acervo 2022-2024 ficam em
+  `Data/Seed/Imagens/` (comitado, copiado pro build igual ao `questoes_enem.json`) e são servidas
+  numa rota estática separada, `/seed-images` (configurada em `Program.cs`, ver
+  `PhysicalFileProvider`). Se crescer o acervo de novo e usar `POST /api/questoes/upload-imagem`
+  pra gerar as imagens, lembrar de mover o resultado pra cá antes de commitar — senão elas somem
+  no próximo `git clone`.
+- **Fonte dos dados 2022-2024**: dataset `maritaca-ai/enem` no Hugging Face (180 questões por
+  ano, texto+alternativas+gabarito, licença Apache 2.0). A API pública `api.enem.dev` (que cobre
+  mais anos) está atrás de proteção anti-bot e não respondeu a nenhuma tentativa de acesso
+  automatizado — se um dia quiser tentar de novo esticar pra 2015-2021, essa é a barreira a
+  vencer, não o Hugging Face.
+- **Puxar dados grandes de API externa**: pedir pro `WebFetch` reproduzir JSON "verbatim" funciona
+  pra lotes pequenos, mas o modelo por trás dele pode falhar silenciosamente perto do limite de
+  saída dele (viu-se um registro com campo faltando e uma resposta com contagem de linhas errada
+  em lotes de 30). O caminho confiável foi usar o navegador real (`javascript_tool`, que tem
+  acesso à internet) pra fazer o `fetch` e devolver o JSON puro — sem modelo nenhum reescrevendo
+  no meio do caminho — e ler o resultado persistido em disco via Python, nunca via
+  print()/terminal (o console do Windows corrompe acento em UTF-8 na exibição, mesmo com o
+  arquivo em disco intacto — sempre validar o arquivo real, não a tela).
+
+## Regras importantes — não esquecer
+
+- **Nunca incluir menção a IA em commits ou arquivos deste projeto** (pedido explícito do
+  usuário, é trabalho de faculdade). Isso inclui: **não usar o rodapé
+  `Co-Authored-By: Claude ...`** nos commits (diferente do padrão default). Já tivemos que
+  limpar o histórico do repo original uma vez por causa disso — não repetir.
+- `.claude/` é config local de ferramenta, sempre fica de fora do git (`.gitignore` já cobre)
+- O `gh` CLI está instalado na máquina mas raramente continua autenticado entre sessões — usar
+  `git` puro funciona bem (push direto via credential manager do Windows, sem precisar de
+  token)
+- Bancos `.db`/`.db-shm`/`.db-wal` e `bin/`/`obj/` são sempre gitignored — nunca commitar
+
+## Pendências conhecidas / possíveis próximos passos
+
+- **Algumas questões 2022-2024 têm formatação de tabela em markdown no enunciado** (ex.: dados
+  de um experimento em formato `| coluna | coluna |`) — ficaram como texto puro com `|` literais
+  em vez de reformatadas, porque não dava pra revisar as 535 questões uma a uma. Cosmético, o
+  conteúdo continua correto e legível.
+- **Uma questão só pode ter 1 imagem** (`Questao.ImagemUrl` é string única) — um punhado das
+  questões 2022-2024 tinha 2 imagens na fonte (ex.: dois gráficos complementares); só a primeira
+  foi importada. Não travou nenhuma questão, mas quem for revisar o acervo pode achar um caso ou
+  outro em que falta contexto visual.
+- **`Disciplina` das questões novas (2022-2024) é igual à `Area`** (ex.: "Matemática e suas
+  Tecnologias" nos dois campos) — a fonte de dados não tem a disciplina específica (Física vs.
+  Química vs. Biologia, por exemplo) por questão, só a área ampla do ENEM. As 4 questões
+  originais continuam com disciplina específica.
+- Nenhuma dessas pendências bloqueia o uso do sistema — são possíveis evoluções futuras.
+
+## Depois que o produto estiver pronto
+
+O usuário vai precisar da documentação completa do projeto (TAP + documentação do trabalho de
+faculdade) e ainda vai mandar exemplos/modelos pra seguir como referência de formato antes disso
+começar — não adiantar essa parte sozinho sem os exemplos.

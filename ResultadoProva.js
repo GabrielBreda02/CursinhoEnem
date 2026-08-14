@@ -12,6 +12,8 @@ const questoesResultado = document.getElementById("questoesResultado");
 const secaoRedacaoResultado = document.getElementById("secaoRedacaoResultado");
 const temaRedacaoResultado = document.getElementById("temaRedacaoResultado");
 const textoRedacaoResultado = document.getElementById("textoRedacaoResultado");
+const notaRedacaoResultado = document.getElementById("notaRedacaoResultado");
+const comentarioRedacaoResultado = document.getElementById("comentarioRedacaoResultado");
 
 if (!tentativaId) {
     tituloProva.textContent = "Resultado não encontrado.";
@@ -73,5 +75,18 @@ function renderizarResultado(dados) {
         secaoRedacaoResultado.style.display = "block";
         temaRedacaoResultado.textContent = dados.temaRedacaoTitulo;
         textoRedacaoResultado.textContent = dados.textoRedacao || "(nenhum texto enviado)";
+
+        if (dados.notaRedacao != null) {
+            notaRedacaoResultado.textContent = `Nota da redação: ${dados.notaRedacao} / 1000`;
+            notaRedacaoResultado.className = "status-correta";
+        } else {
+            notaRedacaoResultado.textContent = "Aguardando correção do professor";
+            notaRedacaoResultado.className = "";
+        }
+
+        if (dados.comentarioRedacao) {
+            comentarioRedacaoResultado.style.display = "block";
+            comentarioRedacaoResultado.innerHTML = `<strong>Comentário do professor:</strong><br>${dados.comentarioRedacao}`;
+        }
     }
 }

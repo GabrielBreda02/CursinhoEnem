@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrigir Redação</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="Estilo.css">
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div class="container">
+        <h1 class="titulo">Corrigir Redação</h1>
+        <p id="alunoInfo" class="subtitulo">Carregando...</p>
+
+        <p id="temaRedacaoTitulo" class="titulo-tabela"></p>
+        <p id="temaRedacaoTexto" style="white-space:pre-wrap;margin:12px 0;"></p>
+
+        <p class="titulo-tabela">Redação do aluno</p>
+        <p id="textoRedacao" style="white-space:pre-wrap;background:var(--bg);padding:16px;border-radius:var(--radius-sm);"></p>
+
+        <form id="formCorrecao" style="margin-top:24px;">
+            <div class="row">
+                <div class="campo">
+                    <label>Nota (0 a 1000)</label>
+                    <input type="number" id="notaRedacao" min="0" max="1000" placeholder="Ex.: 800">
+                </div>
+            </div>
+            <div class="campo">
+                <label>Comentário para o aluno</label>
+                <textarea id="comentarioRedacao" placeholder="Feedback sobre a redação..." style="min-height:150px;"></textarea>
+            </div>
+            <div class="acoes">
+                <button type="button" onclick="salvarCorrecao()" class="btn">Salvar Correção</button>
+                <button type="button" onclick="window.location.href='Redacoes.html'" class="btn btn-ghost">Voltar</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="CorrigirRedacao.js"></script>
+</body>
+
+</html>

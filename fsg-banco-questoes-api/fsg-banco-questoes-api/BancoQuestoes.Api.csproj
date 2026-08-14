@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <None Include="Data\Seed\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Data\Seed\Imagens\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project> 

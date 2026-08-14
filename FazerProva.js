@@ -45,9 +45,12 @@ function iniciarTela(dados) {
     expiraEm = new Date(dados.expiraEm);
     tituloProva.textContent = dados.provaTitulo;
 
+    const respostasSalvas = {};
+    (dados.respostasSalvas || []).forEach(r => respostasSalvas[r.questaoId] = r.alternativaId);
+
     questoesContainer.innerHTML = "";
     dados.questoes.forEach((questao, index) => {
-        questoesContainer.appendChild(criarCardQuestao(questao, index));
+        questoesContainer.appendChild(criarCardQuestao(questao, index, respostasSalvas[questao.idQuestao]));
     });
 
     if (dados.temaRedacaoTitulo) {
@@ -60,7 +63,7 @@ function iniciarTela(dados) {
     intervalId = setInterval(atualizarTimer, 1000);
 }
 
-function criarCardQuestao(questao, index) {
+function criarCardQuestao(questao, index, alternativaSelecionadaId) {
     const card = document.createElement("div");
     card.className = "question-card";
 
@@ -68,12 +71,15 @@ function criarCardQuestao(questao, index) {
         ? `<img src="${API_BASE.replace(/\/api$/, "")}${questao.imagemUrl}" style="max-width:100%;border-radius:8px;margin:8px 0;">`
         : "";
 
-    const alternativasHtml = questao.alternativas.map(alt => `
+    const alternativasHtml = questao.alternativas.map(alt => {
+        const marcada = alt.idAlternativa === alternativaSelecionadaId ? "checked" : "";
+        return `
         <div class="alternativa">
-            <input type="radio" name="questao-${questao.idQuestao}" id="alt-${alt.idAlternativa}" value="${alt.idAlternativa}">
+            <input type="radio" name="questao-${questao.idQuestao}" id="alt-${alt.idAlternativa}" value="${alt.idAlternativa}" ${marcada}>
             <label for="alt-${alt.idAlternativa}" style="font-weight:normal;margin:0;">${alt.descricao}</label>
         </div>
-    `).join("");
+    `;
+    }).join("");
 
     card.innerHTML = `
         <h4>${index + 1}. ${questao.titulo}</h4>

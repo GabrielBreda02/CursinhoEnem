@@ -8,5 +8,6 @@ global using BancoQuestoes.Api.Requests;
 global using BancoQuestoes.Api.Responses;
 global using BancoQuestoes.Api;
 global using System.Net;
+global using System.Net.Http.Json;
 global using System.Text;
 global using System.Text.Json; 

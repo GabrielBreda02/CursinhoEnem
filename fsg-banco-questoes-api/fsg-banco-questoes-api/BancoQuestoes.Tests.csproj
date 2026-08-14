@@ -27,4 +27,13 @@
     <ProjectReference Include="BancoQuestoes.Api.csproj" />
   </ItemGroup>
 
+  <!-- Sem isso, o glob implícito do SDK compila também os fontes da API (mesma pasta do
+       csproj), que já chegam via ProjectReference — dá tipo duplicado e, como este SDK não
+       traz os implicit usings do Sdk.Web, erro de tipo não encontrado em arquivos como
+       JwtTokenService.cs (usa IConfiguration). -->
+  <ItemGroup>
+    <Compile Remove="**\*.cs" />
+    <Compile Include="Tests\**\*.cs" />
+  </ItemGroup>
+
 </Project> 

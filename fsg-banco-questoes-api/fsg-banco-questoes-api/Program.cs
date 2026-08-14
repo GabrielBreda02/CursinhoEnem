@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using BancoQuestoes.Api.Data;
@@ -127,7 +128,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // serve /uploads/questoes/... (imagens dos enunciados)
+app.UseStaticFiles(); // serve /uploads/questoes/... (imagens enviadas pelo professor)
+
+// Imagens do acervo curado do ENEM (Data/Seed/questoes_enem.json) ficam versionadas no repo,
+// separadas da pasta de upload (que é gitignored) — sem isso, quem clona o repo teria as
+// questões com imagem quebradas.
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "Imagens")),
+    RequestPath = "/seed-images"
+});
+
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -140,7 +151,18 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BancoQuestoesContext>();
     context.Database.EnsureCreated();
-    DbSeeder.Seed(context);
+
+    // Os testes de integração sobem a aplicação real via WebApplicationFactory — sem esse
+    // guard, o seed rodaria contra o banco in-memory do teste e quebraria as asserções que
+    // esperam banco vazio.
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        DbSeeder.Seed(context);
+    }
 }
 
 app.Run();
+
+// Top-level statements geram uma classe Program interna — precisa ser pública pra
+// WebApplicationFactory<Program> (Tests/IntegrationTestBase.cs) conseguir enxergá-la.
+public partial class Program { }

@@ -33,6 +33,9 @@ public class TentativasController : ControllerBase
         return int.TryParse(valor, out var id) ? id : null;
     }
 
+    private static int CalcularNotaObjetivas(TentativaProva tentativa) =>
+        tentativa.Respostas.Count(r => r.AlternativaSelecionada?.Correta == true);
+
     /// <summary>
     /// Inicia uma nova tentativa de prova. O prazo (ExpiraEm) é calculado aqui, no servidor.
     /// </summary>
@@ -64,16 +67,43 @@ public class TentativasController : ControllerBase
             return BadRequest(new ApiResponse { Message = "Essa prova não tem questões", Success = false });
         }
 
-        var iniciadoEm = DateTime.UtcNow;
-        var tentativa = new TentativaProva
-        {
-            ProvaId = prova.IdProva,
-            AlunoId = alunoId.Value,
-            IniciadoEm = iniciadoEm,
-            ExpiraEm = iniciadoEm.AddMinutes(prova.TempoLimiteMinutos)
-        };
+        // Se já existe uma tentativa não finalizada dessa mesma prova, retoma ela em vez de
+        // criar outra — assim atualizar a página no meio da prova não reinicia o cronômetro
+        // nem abandona as respostas já dadas.
+        var tentativaAberta = await _context.Tentativas
+            .Include(t => t.Respostas)
+                .ThenInclude(r => r.AlternativaSelecionada)
+            .Where(t => t.ProvaId == prova.IdProva && t.AlunoId == alunoId.Value && t.FinalizadoEm == null)
+            .OrderByDescending(t => t.IniciadoEm)
+            .FirstOrDefaultAsync();
 
-        _context.Tentativas.Add(tentativa);
+        TentativaProva tentativa;
+
+        if (tentativaAberta != null && DateTime.UtcNow <= tentativaAberta.ExpiraEm)
+        {
+            tentativa = tentativaAberta;
+        }
+        else
+        {
+            if (tentativaAberta != null)
+            {
+                // O prazo passou e o aluno nunca finalizou (ex.: fechou a aba) — fecha essa
+                // tentativa órfã com a nota que já tinha antes de abrir uma nova.
+                tentativaAberta.FinalizadoEm = tentativaAberta.ExpiraEm;
+                tentativaAberta.NotaObjetivas = CalcularNotaObjetivas(tentativaAberta);
+            }
+
+            var iniciadoEm = DateTime.UtcNow;
+            tentativa = new TentativaProva
+            {
+                ProvaId = prova.IdProva,
+                AlunoId = alunoId.Value,
+                IniciadoEm = iniciadoEm,
+                ExpiraEm = iniciadoEm.AddMinutes(prova.TempoLimiteMinutos)
+            };
+            _context.Tentativas.Add(tentativa);
+        }
+
         await _context.SaveChangesAsync();
 
         var response = new TentativaIniciadaResponse
@@ -97,7 +127,11 @@ public class TentativasController : ControllerBase
                     IdAlternativa = a.IdAlternativa,
                     Descricao = a.Descricao
                 }).ToList()
-            }).ToList()
+            }).ToList(),
+            RespostasSalvas = tentativa.Respostas
+                .Where(r => r.AlternativaSelecionadaId != null)
+                .Select(r => new RespostaSalvaResponse { QuestaoId = r.QuestaoId, AlternativaId = r.AlternativaSelecionadaId!.Value })
+                .ToList()
         };
 
         return StatusCode(201, response);
@@ -211,7 +245,7 @@ public class TentativasController : ControllerBase
 
         tentativa.TextoRedacao = request.TextoRedacao;
         tentativa.FinalizadoEm = DateTime.UtcNow;
-        tentativa.NotaObjetivas = tentativa.Respostas.Count(r => r.AlternativaSelecionada?.Correta == true);
+        tentativa.NotaObjetivas = CalcularNotaObjetivas(tentativa);
 
         await _context.SaveChangesAsync();
 
@@ -270,6 +304,8 @@ public class TentativasController : ControllerBase
             TotalQuestoes = tentativa.Prova.Questoes.Count,
             TextoRedacao = tentativa.TextoRedacao,
             TemaRedacaoTitulo = tentativa.Prova.TemaRedacao?.Titulo,
+            NotaRedacao = tentativa.NotaRedacao,
+            ComentarioRedacao = tentativa.ComentarioRedacao,
             Questoes = tentativa.Prova.Questoes.Select(q =>
             {
                 respostasPorQuestao.TryGetValue(q.IdQuestao, out var alternativaSelecionadaId);

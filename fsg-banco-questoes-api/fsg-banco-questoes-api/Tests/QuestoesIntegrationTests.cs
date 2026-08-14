@@ -34,6 +34,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Qual é a capital do Brasil?",
             Disciplina = "Geografia",
+            Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Capitais", "Brasil"],
             Alternativas = 
             [
@@ -63,6 +64,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão sem alternativa correta",
             Disciplina = "Teste",
+            Area = AreaConhecimento.Matematica,
             Assuntos = ["Teste"],
             Alternativas = 
             [
@@ -90,6 +92,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Teste questão",
             Disciplina = "Teste",
+            Area = AreaConhecimento.Matematica,
             Assuntos = ["Teste"],
             Alternativas = 
             [
@@ -135,6 +138,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão original",
             Disciplina = "Original",
+            Area = AreaConhecimento.Matematica,
             Assuntos = ["Original"],
             Alternativas = 
             [
@@ -150,6 +154,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão atualizada",
             Disciplina = "Atualizada",
+            Area = AreaConhecimento.Matematica,
             Assuntos = ["Atualizada"],
             Alternativas = 
             [
@@ -177,6 +182,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão para deletar",
             Disciplina = "Teste",
+            Area = AreaConhecimento.Matematica,
             Assuntos = ["Teste"],
             Alternativas = 
             [
@@ -207,6 +213,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão de Matemática",
             Disciplina = "Matemática",
+            Area = AreaConhecimento.Matematica,
             Assuntos = ["Álgebra"],
             Alternativas = 
             [
@@ -219,6 +226,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         {
             Titulo = "Questão de História",
             Disciplina = "História",
+            Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Brasil Colonial"],
             Alternativas = 
             [

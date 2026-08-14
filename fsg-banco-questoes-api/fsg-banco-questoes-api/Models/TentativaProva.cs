@@ -27,5 +27,11 @@ public class TentativaProva
     /// <summary>Quantidade de questões objetivas corretas, calculada ao finalizar.</summary>
     public int? NotaObjetivas { get; set; }
 
+    /// <summary>Nota da redação (0-1000, escala ENEM), atribuída pelo professor. Nula até ser corrigida.</summary>
+    public int? NotaRedacao { get; set; }
+
+    /// <summary>Comentário/feedback do professor sobre a redação. Opcional.</summary>
+    public string? ComentarioRedacao { get; set; }
+
     public List<RespostaAluno> Respostas { get; set; } = new();
 }

@@ -89,6 +89,7 @@ public static class DbSeeder
                 Assuntos = questao.Assuntos,
                 Ano = questao.Ano,
                 Fonte = questao.Fonte,
+                ImagemUrl = questao.ImagemUrl,
                 Alternativas = questao.Alternativas.Select(a => new Alternativa
                 {
                     Descricao = a.Descricao,
@@ -107,7 +108,14 @@ public static class DbSeeder
             return;
         }
 
-        var questoes = context.Questoes.ToList();
+        // Uma questão de cada área, não o acervo inteiro — o acervo cresce (ver
+        // Data/Seed/questoes_enem.json), mas essa prova de exemplo continua pequena de propósito.
+        var questoes = context.Questoes
+            .ToList()
+            .GroupBy(q => q.Area)
+            .Select(g => g.First())
+            .ToList();
+
         if (questoes.Count == 0)
         {
             return;
@@ -149,6 +157,7 @@ public static class DbSeeder
         public List<string> Assuntos { get; set; } = new();
         public int? Ano { get; set; }
         public string? Fonte { get; set; }
+        public string? ImagemUrl { get; set; }
         public List<SeedAlternativa> Alternativas { get; set; } = new();
     }
 

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using BancoQuestoes.Api.Models;
 
 namespace BancoQuestoes.Api.Data;
@@ -16,6 +17,34 @@ public class BancoQuestoesContext : DbContext
     public DbSet<TemaRedacao> TemasRedacao { get; set; }
     public DbSet<TentativaProva> Tentativas { get; set; }
     public DbSet<RespostaAluno> RespostasAluno { get; set; }
+
+    // O SQLite não guarda o Kind do DateTime — toda leitura volta com Kind=Unspecified,
+    // o que faz o Newtonsoft omitir o "Z" na serialização e o navegador interpretar o
+    // horário como local em vez de UTC (o app inteiro só grava DateTime.UtcNow, então é
+    // seguro forçar Utc de volta em toda leitura).
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<UtcNullableDateTimeConverter>();
+    }
+
+    private class UtcDateTimeConverter : ValueConverter<DateTime, DateTime>
+    {
+        public UtcDateTimeConverter() : base(
+            v => v,
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+        {
+        }
+    }
+
+    private class UtcNullableDateTimeConverter : ValueConverter<DateTime?, DateTime?>
+    {
+        public UtcNullableDateTimeConverter() : base(
+            v => v,
+            v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v)
+        {
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

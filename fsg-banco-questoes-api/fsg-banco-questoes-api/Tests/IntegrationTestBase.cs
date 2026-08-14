@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ using BancoQuestoes.Api.Data;
 
 namespace BancoQuestoes.Tests;
 
-public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>, IDisposable
+public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>, IAsyncLifetime, IDisposable
 {
     protected readonly WebApplicationFactory<Program> _factory;
     protected readonly HttpClient _client;
@@ -17,6 +18,8 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
         _dbName = Guid.NewGuid().ToString();
         _factory = factory.WithWebHostBuilder(builder =>
         {
+            builder.UseEnvironment("Testing");
+
             builder.ConfigureServices(services =>
             {
                 // Remove o contexto existente
@@ -41,7 +44,33 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
         var context = scope.ServiceProvider.GetRequiredService<BancoQuestoesContext>();
         context.Database.EnsureCreated();
     }
-    
+
+    // Questoes/Provas/TemasRedacao exigem [Authorize(Roles = "Professor")] nos endpoints de
+    // escrita — sem logar antes, todo POST/PUT/DELETE nos testes cai em 401. xUnit não
+    // suporta construtor assíncrono, por isso o login entra aqui via IAsyncLifetime.
+    public async Task InitializeAsync()
+    {
+        await _client.PostAsJsonAsync("/api/auth/registrar", new RegistrarUsuarioRequest
+        {
+            Nome = "Professor Teste",
+            Email = "professor.tests@teste.com",
+            Senha = "senha123",
+            Tipo = "Professor"
+        });
+
+        var loginResponse = await _client.PostAsJsonAsync("/api/auth/login", new LoginRequest
+        {
+            Email = "professor.tests@teste.com",
+            Senha = "senha123"
+        });
+        loginResponse.EnsureSuccessStatusCode();
+
+        var login = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login!.Token);
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
     public void Dispose()
     {
         using var scope = _factory.Services.CreateScope();

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Menu Inicial</title>
+  <title>CursinhoEnem</title>
   <link rel="stylesheet" href="Estilo.css" />
 </head>
 
@@ -12,19 +12,36 @@
   <div class="container">
     <div id="userBar" class="user-bar"></div>
 
-    <h1 class="titulo">Menu Principal</h1>
-    <div class="button-group">
-      <a href="Questoes.html" class="botao-link">Cadastrar Questões</a>
-      <a href="Provas.html" class="botao-link">Gerar Provas</a>
-    </div>
+    <h1 class="titulo">CursinhoEnem</h1>
+    <div id="menuPrincipal" class="button-group"></div>
   </div>
 
   <script src="auth.js"></script>
   <script>
     const userBar = document.getElementById("userBar");
     userBar.innerHTML = estaLogado()
-      ? `<span>Olá, ${getNomeUsuario()}</span> <button class="btn" onclick="logout()">Sair</button>`
+      ? `<span>Olá, ${getNomeUsuario()} (${getTipoUsuario()})</span> <button class="btn" onclick="logout()">Sair</button>`
       : `<span>Você não está logado</span> <a class="btn" href="Login.html">Entrar</a>`;
+
+    const menuPrincipal = document.getElementById("menuPrincipal");
+    if (ehProfessor()) {
+      menuPrincipal.innerHTML = `
+        <a href="Questoes.html" class="botao-link">Cadastrar Questões</a>
+        <a href="Provas.html" class="botao-link">Gerar Provas</a>
+        <a href="TemasRedacao.html" class="botao-link">Temas de Redação</a>
+      `;
+    } else if (ehAluno()) {
+      menuPrincipal.innerHTML = `
+        <a href="SelecionarProva.html" class="botao-link">Fazer uma Prova</a>
+        <a href="Historico.html" class="botao-link">Meu Histórico</a>
+      `;
+    } else {
+      menuPrincipal.innerHTML = `
+        <p>Entre ou cadastre-se para acessar o sistema.</p>
+        <a href="Login.html" class="botao-link">Entrar</a>
+        <a href="Registro.html" class="botao-link">Cadastre-se</a>
+      `;
+    }
   </script>
 </body>
 

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazendo a Prova</title>
+    <link rel="stylesheet" href="Estilo.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="timerBadge" class="timer-badge">--:--</div>
+
+        <h1 id="tituloProva">Carregando prova...</h1>
+
+        <div id="questoesContainer"></div>
+
+        <div id="secaoRedacao" style="display:none;">
+            <h2>Redação</h2>
+            <div id="temaRedacaoTitulo" class="titulo-tabela"></div>
+            <p id="temaRedacaoTexto" style="white-space:pre-wrap;margin:12px 0;"></p>
+            <div class="campo">
+                <label>Escreva sua redação</label>
+                <textarea id="textoRedacao" style="min-height:300px;" placeholder="Escreva seu texto aqui..."></textarea>
+            </div>
+        </div>
+
+        <div class="acoes" style="margin-top:20px;">
+            <button type="button" onclick="finalizarProva(false)" class="btn">Finalizar Prova</button>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="FazerProva.js"></script>
+</body>
+
+</html>

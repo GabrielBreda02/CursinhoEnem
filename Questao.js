@@ -6,8 +6,6 @@ const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
 const tituloInput = document.getElementById("titulo");
-const disciplinaInput = document.getElementById("disciplina");
-const assuntosInput = document.getElementById("assuntos");
 const areaInput = document.getElementById("area");
 const anoInput = document.getElementById("ano");
 const fonteInput = document.getElementById("fonte");
@@ -24,8 +22,6 @@ if (id) {
         .then(res => res.json())
         .then(questao => {
             tituloInput.value = questao.titulo;
-            disciplinaInput.value = questao.disciplina;
-            assuntosInput.value = questao.assuntos.join(", ");
             areaInput.value = questao.area || areaInput.value;
             anoInput.value = questao.ano || "";
             fonteInput.value = questao.fonte || "";
@@ -114,7 +110,6 @@ function adicionarAlternativa(descricao = "", correta = false) {
 
 
 function obterDadosQuestao() {
-    const assuntos = assuntosInput.value.split(",").map(a => a.trim()).filter(a => a);
     const alternativas = Array.from(document.querySelectorAll(".alternativa")).map(alt => ({
         descricao: alt.querySelector("input[type=text]").value,
         correta: alt.querySelector("input[type=radio]").checked
@@ -122,12 +117,10 @@ function obterDadosQuestao() {
 
     return {
         titulo: tituloInput.value,
-        disciplina: disciplinaInput.value,
         area: areaInput.value,
         ano: anoInput.value ? Number(anoInput.value) : null,
         fonte: fonteInput.value.trim() || null,
         imagemUrl: imagemUrlAtual,
-        assuntos,
         alternativas
     };
 }

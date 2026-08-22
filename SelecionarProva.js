@@ -21,10 +21,13 @@ fetch(`${API_BASE}/Provas`)
             const temaHtml = prova.temaRedacaoTitulo
                 ? `<p><strong>Redação:</strong> ${prova.temaRedacaoTitulo}</p>`
                 : "";
+            const turmaHtml = prova.turma
+                ? `<p><strong>Turma:</strong> ${prova.turma}</p>`
+                : "";
 
             card.innerHTML = `
                 <h3>${prova.titulo}</h3>
-                <p><strong>Disciplina:</strong> ${prova.disciplina}</p>
+                ${turmaHtml}
                 <p><strong>Questões:</strong> ${prova.quantidadeQuestoes} — <strong>Tempo:</strong> ${prova.tempoLimiteMinutos} minutos</p>
                 ${temaHtml}
                 <div class="acoes">

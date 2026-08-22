@@ -22,21 +22,9 @@
           <input type="text" id="titulo" placeholder="Digite a materia da prova">
         </div>
 
-        <div class="row">
-          <div class="form-group">
-            <label for="materia">Disciplina</label>
-            <input type="text" id="disciplina" placeholder="Ex: Programação Web">
-          </div>
-
-          <div class="form-group">
-            <label for="conteudo">Conteúdo</label>
-            <input type="text" id="conteudo" placeholder="Ex: HTML, CSS, JS">
-          </div>
-        </div>
-
         <div class="form-group">
-          <label for="turma">Turma/Semestre</label>
-          <input type="text" id="turma" placeholder="Ex: 3º Semestre - TI">
+          <label for="turma">Número da Turma</label>
+          <input type="text" id="turma" placeholder="Ex: 101">
         </div>
 
         <div class="row">
@@ -56,16 +44,15 @@
         <h5>Banco de Questões</h5>
 
         <div class="form-group">
-          <label>Filtrar Disciplina:</label>
-          <input type="text" id="filtroDisciplina">
-          <label>Filtrar Assunto:</label>
-          <input type="text" id="filtroAssunto">
+          <label>Buscar por palavra no enunciado:</label>
+          <input type="text" id="filtroBusca" placeholder="Ex: racismo">
           <button type="button" onclick="buscarQuestoes()" class="btn">Filtrar</button>
         </div>
 
         <h5 class="titulo-tabela">Questões Disponíveis</h5>
         <table class="tabela-questoes" id="tabelaQuestoes">
         </table>
+        <div id="paginacaoQuestoes"></div>
 
         <h5 class="titulo-tabela">Questões Selecionadas</h5>
         <table class="tabela-questoes" id="tabelaSelecionadas">

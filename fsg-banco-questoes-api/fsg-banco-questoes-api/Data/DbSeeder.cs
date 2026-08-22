@@ -84,7 +84,6 @@ public static class DbSeeder
             context.Questoes.Add(new Questao
             {
                 Titulo = questao.Titulo,
-                Disciplina = questao.Disciplina,
                 Area = questao.Area,
                 Assuntos = questao.Assuntos,
                 Ano = questao.Ano,
@@ -126,7 +125,6 @@ public static class DbSeeder
         context.Provas.Add(new Prova
         {
             Titulo = "Simulado de exemplo — uma questão de cada área",
-            Disciplina = "Geral",
             TempoLimiteMinutos = 60,
             TemaRedacaoId = tema?.IdTemaRedacao,
             Questoes = questoes
@@ -153,7 +151,6 @@ public static class DbSeeder
     {
         public string Titulo { get; set; } = string.Empty;
         public string Area { get; set; } = string.Empty;
-        public string Disciplina { get; set; } = string.Empty;
         public List<string> Assuntos { get; set; } = new();
         public int? Ano { get; set; }
         public string? Fonte { get; set; }

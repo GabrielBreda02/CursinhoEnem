@@ -37,7 +37,7 @@ public class ProvasController : ControllerBase
         {
             IdProva = p.IdProva,
             Titulo = p.Titulo,
-            Disciplina = p.Disciplina,
+            Turma = p.Turma,
             QuantidadeQuestoes = p.Questoes.Count,
             TempoLimiteMinutos = p.TempoLimiteMinutos,
             TemaRedacaoId = p.TemaRedacaoId,
@@ -76,7 +76,7 @@ public class ProvasController : ControllerBase
         {
             IdProva = prova.IdProva,
             Titulo = prova.Titulo,
-            Disciplina = prova.Disciplina,
+            Turma = prova.Turma,
             TempoLimiteMinutos = prova.TempoLimiteMinutos,
             TemaRedacaoId = prova.TemaRedacaoId,
             TemaRedacaoTitulo = prova.TemaRedacao?.Titulo,
@@ -84,7 +84,6 @@ public class ProvasController : ControllerBase
             {
                 IdQuestao = q.IdQuestao,
                 Titulo = q.Titulo,
-                Disciplina = q.Disciplina,
                 Assuntos = q.Assuntos,
                 Area = q.Area,
                 ImagemUrl = q.ImagemUrl,
@@ -155,7 +154,7 @@ public class ProvasController : ControllerBase
         var prova = new Prova
         {
             Titulo = request.Titulo,
-            Disciplina = request.Disciplina,
+            Turma = request.Turma,
             TempoLimiteMinutos = request.TempoLimiteMinutos,
             TemaRedacaoId = request.TemaRedacaoId,
             Questoes = questoes
@@ -239,7 +238,7 @@ public class ProvasController : ControllerBase
             .ToListAsync();
 
         prova.Titulo = request.Titulo;
-        prova.Disciplina = request.Disciplina;
+        prova.Turma = request.Turma;
         prova.TempoLimiteMinutos = request.TempoLimiteMinutos;
         prova.TemaRedacaoId = request.TemaRedacaoId;
         prova.Questoes = questoes;

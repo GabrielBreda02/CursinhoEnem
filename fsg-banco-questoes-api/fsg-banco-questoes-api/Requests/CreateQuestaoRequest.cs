@@ -7,11 +7,7 @@ public class CreateQuestaoRequest
     [Required(ErrorMessage = "O título é obrigatório")]
     [StringLength(500, ErrorMessage = "O título deve ter no máximo 500 caracteres")]
     public string Titulo { get; set; } = string.Empty;
-    
-    [Required(ErrorMessage = "A disciplina é obrigatória")]
-    [StringLength(100, ErrorMessage = "A disciplina deve ter no máximo 100 caracteres")]
-    public string Disciplina { get; set; } = string.Empty;
-    
+
     public List<string> Assuntos { get; set; } = new();
 
     [Required(ErrorMessage = "A área de conhecimento é obrigatória")]

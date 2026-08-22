@@ -2,15 +2,18 @@ const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
 const tituloInput = document.getElementById("titulo");
-const disciplinaInput = document.getElementById("disciplina");
+const turmaInput = document.getElementById("turma");
 const tempoLimiteInput = document.getElementById("tempoLimite");
 const temaRedacaoSelect = document.getElementById("temaRedacao");
-const filtroDisciplinaInput = document.getElementById("filtroDisciplina");
-const filtroAssuntoInput = document.getElementById("filtroAssunto");
+const filtroBuscaInput = document.getElementById("filtroBusca");
 const listaBanco = document.getElementById("tabelaQuestoes");
 const listaSelecionadas = document.getElementById("tabelaSelecionadas");
+const paginacaoQuestoesContainer = document.getElementById("paginacaoQuestoes");
+
+const TAMANHO_PAGINA = 20;
 
 let questoesSelecionadas = [];
+let paginaAtualQuestoes = 1;
 
 fetch(`${API_BASE}/temas-redacao`)
     .then(res => res.json())
@@ -27,7 +30,7 @@ fetch(`${API_BASE}/temas-redacao`)
                 .then(res => res.json())
                 .then(prova => {
                     tituloInput.value = prova.titulo;
-                    disciplinaInput.value = prova.disciplina;
+                    turmaInput.value = prova.turma || "";
                     tempoLimiteInput.value = prova.tempoLimiteMinutos;
                     temaRedacaoSelect.value = prova.temaRedacaoId || "";
                     questoesSelecionadas = prova.questoes.map(q => q.idQuestao);
@@ -36,19 +39,26 @@ fetch(`${API_BASE}/temas-redacao`)
         }
     });
 
-function buscarQuestoes() {
-    const disciplina = filtroDisciplinaInput.value;
-    const assunto = filtroAssuntoInput.value;
-    fetch(`${API_BASE}/questoes?disciplina=${disciplina}&assunto=${assunto}`, {
+buscarQuestoes();
+
+function buscarQuestoes(pagina = 1) {
+    paginaAtualQuestoes = pagina;
+
+    const query = new URLSearchParams({ pagina, tamanhoPagina: TAMANHO_PAGINA });
+    const busca = filtroBuscaInput.value.trim();
+    if (busca) {
+        query.set("busca", busca);
+    }
+
+    fetch(`${API_BASE}/questoes?${query.toString()}`, {
         method: "GET"
     })
         .then(res => res.json())
-        .then(questoes => {
+        .then(({ itens: questoes, paginaAtual, totalPaginas }) => {
             listaBanco.innerHTML = "";
 
             if (questoes.length === 0) {
                 listaBanco.innerHTML = "<p>Nenhuma questão encontrada.</p>";
-                return;
             }
 
             questoes.forEach(questao => {
@@ -56,13 +66,16 @@ function buscarQuestoes() {
                 div.className = "question-card";
 
                 div.innerHTML = `
+                    ${questao.area ? `<span class="badge-area">${formatArea(questao.area)}</span>` : ""}
                     <h4>${questao.titulo}</h4>
-                    <p>${questao.assuntos.join(", ")}</p>
                     <button onclick="adicionarQuestao(${questao.idQuestao})" class="btn">Adicionar</button>
                 `;
 
                 listaBanco.appendChild(div);
             });
+
+            paginacaoQuestoesContainer.innerHTML = "";
+            paginacaoQuestoesContainer.appendChild(criarControlesPaginacao(paginaAtual, totalPaginas, buscarQuestoes));
         });
 }
 
@@ -89,8 +102,8 @@ function carregarQuestoesSelecionadas() {
                 div.className = "question-card";
 
                 div.innerHTML = `
+                    ${questao.area ? `<span class="badge-area">${formatArea(questao.area)}</span>` : ""}
                     <h4>${questao.titulo}</h4>
-                    <p>${questao.assuntos.join(", ")}</p>
                     <button onclick="removerQuestao(${questao.idQuestao})" class="btn btn-danger">Remover</button>
                 `;
 
@@ -102,14 +115,14 @@ function carregarQuestoesSelecionadas() {
 function salvarProva() {
     const dados = {
         titulo: tituloInput.value.trim(),
-        disciplina: disciplinaInput.value.trim(),
+        turma: turmaInput.value.trim() || null,
         tempoLimiteMinutos: Number(tempoLimiteInput.value) || 180,
         temaRedacaoId: temaRedacaoSelect.value ? Number(temaRedacaoSelect.value) : null,
         QuestoesIds: questoesSelecionadas
     };
 
-    if (!dados.titulo || !dados.disciplina) {
-        alert("Preencha o título e a disciplina.");
+    if (!dados.titulo) {
+        alert("Preencha o título da prova.");
         return;
     }
 

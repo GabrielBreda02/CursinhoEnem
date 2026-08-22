@@ -53,7 +53,6 @@ public class BancoQuestoesContext : DbContext
         {
             entity.HasKey(e => e.IdQuestao);
             entity.Property(e => e.Titulo).IsRequired().HasMaxLength(500);
-            entity.Property(e => e.Disciplina).IsRequired().HasMaxLength(100);
             entity.Property(e => e.AssuntosJson).HasDefaultValue("[]");
             entity.Property(e => e.Area).IsRequired().HasMaxLength(100);
             entity.Property(e => e.ImagemUrl).HasMaxLength(500);
@@ -79,7 +78,7 @@ public class BancoQuestoesContext : DbContext
         {
             entity.HasKey(e => e.IdProva);
             entity.Property(e => e.Titulo).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Disciplina).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Turma).HasMaxLength(50);
             entity.Property(e => e.TempoLimiteMinutos).IsRequired();
 
             entity.HasMany(e => e.Questoes)

@@ -74,29 +74,29 @@ public class QuestoesController : ControllerBase
     }
 
     /// <summary>
-    /// Lista todas as questões
+    /// Lista as questões, com busca por palavra no enunciado e paginação
     /// </summary>
-    /// <param name="disciplina">Filtro por disciplina (opcional)</param>
-    /// <param name="assunto">Filtro por assunto (opcional)</param>
+    /// <param name="busca">Filtro por palavra(s) contida(s) no enunciado da questão (opcional)</param>
     /// <param name="area">Filtro por área de conhecimento do ENEM (opcional)</param>
-    /// <returns>Lista de questões</returns>
+    /// <param name="pagina">Número da página, a partir de 1 (padrão: 1)</param>
+    /// <param name="tamanhoPagina">Quantidade de questões por página (padrão: 20)</param>
+    /// <returns>Página de questões</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(List<QuestaoListResponse>), 200)]
-    public async Task<ActionResult<List<QuestaoListResponse>>> GetQuestoes(
-        [FromQuery] string? disciplina = null,
-        [FromQuery] string? assunto = null,
-        [FromQuery] string? area = null)
+    [ProducesResponseType(typeof(PaginacaoResponse<QuestaoListResponse>), 200)]
+    public async Task<ActionResult<PaginacaoResponse<QuestaoListResponse>>> GetQuestoes(
+        [FromQuery] string? busca = null,
+        [FromQuery] string? area = null,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanhoPagina = 20)
     {
+        pagina = Math.Max(pagina, 1);
+        tamanhoPagina = Math.Clamp(tamanhoPagina, 1, 100);
+
         var query = _context.Questoes.AsQueryable();
 
-        if (!string.IsNullOrEmpty(disciplina))
+        if (!string.IsNullOrEmpty(busca))
         {
-            query = query.Where(q => q.Disciplina.ToLower().Contains(disciplina.ToLower()));
-        }
-
-        if (!string.IsNullOrEmpty(assunto))
-        {
-            query = query.Where(q => q.AssuntosJson.Contains(assunto));
+            query = query.Where(q => q.Titulo.ToLower().Contains(busca.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(area))
@@ -104,19 +104,31 @@ public class QuestoesController : ControllerBase
             query = query.Where(q => q.Area == area);
         }
 
-        var questoes = await query.ToListAsync();
+        var totalItens = await query.CountAsync();
 
-        var response = questoes.Select(q => new QuestaoListResponse
+        var questoes = await query
+            .OrderBy(q => q.IdQuestao)
+            .Skip((pagina - 1) * tamanhoPagina)
+            .Take(tamanhoPagina)
+            .ToListAsync();
+
+        var response = new PaginacaoResponse<QuestaoListResponse>
         {
-            IdQuestao = q.IdQuestao,
-            Titulo = q.Titulo,
-            Disciplina = q.Disciplina,
-            Assuntos = q.Assuntos,
-            Area = q.Area,
-            ImagemUrl = q.ImagemUrl,
-            Ano = q.Ano,
-            Fonte = q.Fonte
-        }).ToList();
+            Itens = questoes.Select(q => new QuestaoListResponse
+            {
+                IdQuestao = q.IdQuestao,
+                Titulo = q.Titulo,
+                Assuntos = q.Assuntos,
+                Area = q.Area,
+                ImagemUrl = q.ImagemUrl,
+                Ano = q.Ano,
+                Fonte = q.Fonte
+            }).ToList(),
+            PaginaAtual = pagina,
+            TamanhoPagina = tamanhoPagina,
+            TotalItens = totalItens,
+            TotalPaginas = (int)Math.Ceiling(totalItens / (double)tamanhoPagina)
+        };
 
         return Ok(response);
     }
@@ -148,7 +160,6 @@ public class QuestoesController : ControllerBase
         {
             IdQuestao = questao.IdQuestao,
             Titulo = questao.Titulo,
-            Disciplina = questao.Disciplina,
             Assuntos = questao.Assuntos,
             Area = questao.Area,
             ImagemUrl = questao.ImagemUrl,
@@ -207,7 +218,6 @@ public class QuestoesController : ControllerBase
         var questao = new Questao
         {
             Titulo = request.Titulo,
-            Disciplina = request.Disciplina,
             Assuntos = request.Assuntos,
             Area = request.Area,
             ImagemUrl = request.ImagemUrl,
@@ -287,7 +297,6 @@ public class QuestoesController : ControllerBase
         }
 
         questao.Titulo = request.Titulo;
-        questao.Disciplina = request.Disciplina;
         questao.Assuntos = request.Assuntos;
         questao.Area = request.Area;
         questao.ImagemUrl = request.ImagemUrl;

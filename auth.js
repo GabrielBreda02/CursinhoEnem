@@ -68,6 +68,57 @@ function authFetch(url, options = {}) {
     });
 }
 
+// Nomes oficiais do ENEM (Questao.area, valor salvo no banco) são longos demais para
+// exibição ("Matemática e suas Tecnologias") — isso encurta só o texto mostrado na tela.
+function formatArea(area) {
+    return (area || "").replace(/\s+e\s+suas\s+Tecnologias\s*$/i, "").trim();
+}
+
+// Monta os botões de paginação (‹ Anterior, números com reticências, Próxima ›) e chama
+// aoMudarPagina(pagina) quando um deles é clicado. Usado em Questoes.js e Prova.js.
+function criarControlesPaginacao(paginaAtual, totalPaginas, aoMudarPagina) {
+    const nav = document.createElement("div");
+    nav.className = "paginacao";
+
+    if (totalPaginas <= 1) {
+        return nav;
+    }
+
+    function criarBotao(texto, pagina, { ativo = false, desabilitado = false } = {}) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = texto;
+        btn.className = ativo ? "btn" : "btn btn-ghost";
+        btn.disabled = desabilitado;
+        if (!desabilitado) {
+            btn.addEventListener("click", () => aoMudarPagina(pagina));
+        }
+        return btn;
+    }
+
+    nav.appendChild(criarBotao("‹ Anterior", paginaAtual - 1, { desabilitado: paginaAtual <= 1 }));
+
+    const paginasAMostrar = new Set([1, totalPaginas, paginaAtual - 1, paginaAtual, paginaAtual + 1]);
+    let ultimaExibida = 0;
+    Array.from(paginasAMostrar)
+        .filter(p => p >= 1 && p <= totalPaginas)
+        .sort((a, b) => a - b)
+        .forEach(p => {
+            if (ultimaExibida && p - ultimaExibida > 1) {
+                const reticencias = document.createElement("span");
+                reticencias.className = "paginacao-reticencias";
+                reticencias.textContent = "…";
+                nav.appendChild(reticencias);
+            }
+            nav.appendChild(criarBotao(String(p), p, { ativo: p === paginaAtual }));
+            ultimaExibida = p;
+        });
+
+    nav.appendChild(criarBotao("Próxima ›", paginaAtual + 1, { desabilitado: paginaAtual >= totalPaginas }));
+
+    return nav;
+}
+
 // Preenche a barra de navegação (marca + usuário/sair, ou link de login) em qualquer
 // página que tenha um <div id="navbar"></div>. Chamado automaticamente ao carregar a página.
 function renderNavbar() {

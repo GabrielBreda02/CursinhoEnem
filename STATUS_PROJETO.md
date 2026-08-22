@@ -97,6 +97,22 @@ de redação e 1 prova de exemplo montada (1 questão de cada área).
     `Data/Seed/Imagens/`, servidas pela API na rota `/seed-images` (ver observações técnicas).
     `DbSeeder.SeedProvaExemplo` foi ajustado pra pegar só 1 questão por área na prova de exemplo,
     já que antes pegava a tabela inteira
+11. **Campo `Disciplina` removido do sistema inteiro** (model, requests, responses, controllers,
+    seeder e testes, back e front) — era redundante com `Area` pra 535 das 539 questões (ver
+    §Observações abaixo). `Questao.html` também perdeu o campo `Assuntos` do formulário (a
+    propriedade continua existindo no model/API pra quem já tinha assunto cadastrado, só não é
+    mais preenchida manualmente). `Prova` ganhou um campo `Turma` (string opcional) no lugar —
+    antes existia um input "Turma/Semestre" na tela que nem chegava a ser salvo, agora persiste
+    de verdade
+12. **Busca por palavra no enunciado + paginação** — `GET /api/questoes` agora aceita
+    `busca` (contém no `Titulo`, substitui os antigos filtros por disciplina/assunto),
+    `pagina` e `tamanhoPagina` (padrão 20), devolvendo um envelope
+    `{ itens, paginaAtual, totalPaginas, totalItens }` (`Responses/PaginacaoResponse.cs`).
+    `Questoes.html` (banco de questões) e `Prova.html` (montagem de prova) usam isso pra não
+    depender mais de scroll infinito — botões de página no rodapé, com `criarControlesPaginacao()`
+    compartilhado em `auth.js`. Os nomes das áreas do ENEM também foram encurtados na exibição
+    (`formatArea()` em `auth.js` tira o "e suas Tecnologias") — o valor salvo no banco continua
+    o nome oficial completo
 
 Todas as fases foram testadas por `curl`/script Python e pelo navegador (fluxo completo dos
 dois papéis) antes de cada commit.
@@ -118,6 +134,11 @@ dois papéis) antes de cada commit.
   fazia o JSON perder o sufixo `Z` e o navegador ler a data como horário local em vez de UTC —
   bug real encontrado testando "retomar prova" (o timer pulava ~3h). Corrigido com
   `ConfigureConventions` em `BancoQuestoesContext.cs` forçando `DateTimeKind.Utc` na leitura.
+- **Mudar o schema (ex.: remover um campo do model) não migra o banco existente sozinho** —
+  como o projeto usa `EnsureCreated()` em vez de `Migrate()`, é preciso apagar o `.db` local
+  (`bancoquestoes_dev.db` em dev) pra ele recriar do zero com o schema novo; o `DbSeeder` então
+  repopula tudo automaticamente na próxima subida da API. Foi assim que o campo `Disciplina`
+  saiu do banco ao ser removido do model.
 
 ## Observações técnicas (aprendidas ampliando o acervo do ENEM)
 
@@ -165,10 +186,6 @@ dois papéis) antes de cada commit.
   questões 2022-2024 tinha 2 imagens na fonte (ex.: dois gráficos complementares); só a primeira
   foi importada. Não travou nenhuma questão, mas quem for revisar o acervo pode achar um caso ou
   outro em que falta contexto visual.
-- **`Disciplina` das questões novas (2022-2024) é igual à `Area`** (ex.: "Matemática e suas
-  Tecnologias" nos dois campos) — a fonte de dados não tem a disciplina específica (Física vs.
-  Química vs. Biologia, por exemplo) por questão, só a área ampla do ENEM. As 4 questões
-  originais continuam com disciplina específica.
 - Nenhuma dessas pendências bloqueia o uso do sistema — são possíveis evoluções futuras.
 
 ## Depois que o produto estiver pronto

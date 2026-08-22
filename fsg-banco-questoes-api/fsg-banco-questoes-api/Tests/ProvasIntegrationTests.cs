@@ -18,7 +18,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
     {
         // Act
         var response = await _client.GetAsync("/api/provas");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var provas = await response.Content.ReadFromJsonAsync<List<ProvaListResponse>>();
@@ -33,10 +33,9 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questaoRequest = new CreateQuestaoRequest
         {
             Titulo = "Questão de teste",
-            Disciplina = "Matemática",
             Area = AreaConhecimento.Matematica,
             Assuntos = ["Álgebra"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -49,13 +48,12 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova de Matemática",
-            Disciplina = "Matemática",
             QuestoesIds = [questaoCreated!.Id]
         };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/provas", provaRequest);
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var createdResponse = await response.Content.ReadFromJsonAsync<CreatedResponse>();
@@ -71,13 +69,12 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova com questão inexistente",
-            Disciplina = "Teste",
             QuestoesIds = [999] // ID que não existe
         };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/provas", provaRequest);
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -93,10 +90,9 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questaoRequest = new CreateQuestaoRequest
         {
             Titulo = "Questão de teste",
-            Disciplina = "História",
             Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Brasil"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -109,7 +105,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova de História",
-            Disciplina = "História",
+            Turma = "101",
             QuestoesIds = [questaoCreated!.Id]
         };
 
@@ -118,13 +114,13 @@ public class ProvasIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.GetAsync($"/api/provas/{provaCreated!.Id}");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var prova = await response.Content.ReadFromJsonAsync<ProvaDetailResponse>();
         Assert.NotNull(prova);
         Assert.Equal(provaRequest.Titulo, prova.Titulo);
-        Assert.Equal(provaRequest.Disciplina, prova.Disciplina);
+        Assert.Equal(provaRequest.Turma, prova.Turma);
         Assert.Single(prova.Questoes);
     }
 
@@ -133,7 +129,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
     {
         // Act
         var response = await _client.GetAsync("/api/provas/999");
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -149,10 +145,9 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questao1Request = new CreateQuestaoRequest
         {
             Titulo = "Questão 1",
-            Disciplina = "Física",
             Area = AreaConhecimento.CienciasNatureza,
             Assuntos = ["Mecânica"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -162,10 +157,9 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questao2Request = new CreateQuestaoRequest
         {
             Titulo = "Questão 2",
-            Disciplina = "Física",
             Area = AreaConhecimento.CienciasNatureza,
             Assuntos = ["Eletricidade"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -181,7 +175,6 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova Original",
-            Disciplina = "Física",
             QuestoesIds = [questao1Created!.Id]
         };
 
@@ -191,13 +184,12 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var updateRequest = new CreateProvaRequest
         {
             Titulo = "Prova Atualizada",
-            Disciplina = "Física",
             QuestoesIds = [questao1Created.Id, questao2Created!.Id]
         };
 
         // Act
         var response = await _client.PutAsJsonAsync($"/api/provas/{provaCreated!.Id}", updateRequest);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var updateResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -213,10 +205,9 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questaoRequest = new CreateQuestaoRequest
         {
             Titulo = "Questão para prova que será deletada",
-            Disciplina = "Química",
             Area = AreaConhecimento.CienciasNatureza,
             Assuntos = ["Átomos"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -229,7 +220,6 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova para deletar",
-            Disciplina = "Química",
             QuestoesIds = [questaoCreated!.Id]
         };
 
@@ -238,7 +228,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.DeleteAsync($"/api/provas/{provaCreated!.Id}");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var deleteResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -254,10 +244,9 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questao1Request = new CreateQuestaoRequest
         {
             Titulo = "Questão 1",
-            Disciplina = "Geografia",
             Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Continentes"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -267,10 +256,9 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questao2Request = new CreateQuestaoRequest
         {
             Titulo = "Questão 2",
-            Disciplina = "Geografia",
             Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Países"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -286,7 +274,7 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova de Geografia",
-            Disciplina = "Geografia",
+            Turma = "202",
             QuestoesIds = [questao1Created!.Id, questao2Created!.Id]
         };
 
@@ -294,13 +282,13 @@ public class ProvasIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.GetAsync("/api/provas");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var provas = await response.Content.ReadFromJsonAsync<List<ProvaListResponse>>();
         Assert.NotNull(provas);
         Assert.Single(provas);
         Assert.Equal(2, provas[0].QuantidadeQuestoes);
-        Assert.Equal("Geografia", provas[0].Disciplina);
+        Assert.Equal("202", provas[0].Turma);
     }
 }

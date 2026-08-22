@@ -217,6 +217,36 @@ button:active,
     transform: none;
 }
 
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ===============================
+   Paginação (Banco de Questões / Corpo de Prova)
+================================= */
+.paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.paginacao .btn,
+.paginacao .btn-ghost {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+}
+
+.paginacao-reticencias {
+    color: var(--text-muted);
+    padding: 0 4px;
+}
+
 /* ===============================
    Formulários Gerais
 ================================= */

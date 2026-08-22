@@ -275,10 +275,9 @@ Usuario                    TemaRedacao
 Questao  ◄──── N:N ────►  Prova
   IdQuestao                 IdProva
   Titulo (o enunciado)      Titulo
-  Disciplina                Disciplina
-  AssuntosJson              TempoLimiteMinutos
-  Area (uma das 4 do ENEM)  TemaRedacaoId
-  ImagemUrl
+  AssuntosJson              Turma (opcional)
+  Area (uma das 4 do ENEM)  TempoLimiteMinutos
+  ImagemUrl                 TemaRedacaoId
   Ano / Fonte
     │ 1:N
     ▼
@@ -359,9 +358,9 @@ que é o que permite filtrar o acervo por área com segurança.
 | Arquivo | Função |
 |---|---|
 | `Usuario.cs` | Pessoa que usa o sistema. `Tipo` define o papel. |
-| `Questao.cs` | Uma questão: enunciado (`Titulo`), disciplina, área do ENEM, assuntos, imagem opcional, ano e fonte. |
+| `Questao.cs` | Uma questão: enunciado (`Titulo`), área do ENEM, assuntos, imagem opcional, ano e fonte. |
 | `Alternativa.cs` | Uma opção de resposta, com o booleano `Correta`. |
-| `Prova.cs` | Um simulado: título, disciplina, tempo limite e tema de redação opcional. |
+| `Prova.cs` | Um simulado: título, turma (opcional), tempo limite e tema de redação opcional. |
 | `TemaRedacao.cs` | Título + texto motivador (+ ano/fonte, para citar temas oficiais). |
 | `TentativaProva.cs` | O registro de um aluno fazendo uma prova. É a entidade central do produto. |
 | `RespostaAluno.cs` | Uma resposta dentro de uma tentativa. |
@@ -418,10 +417,10 @@ que é o que permite filtrar o acervo por área com segurança.
 
 | Arquivos | Função |
 |---|---|
-| `Questoes.html` / `Questoes.js` | Lista o banco de questões em cards, com badge de área, imagem e ações de editar/excluir. |
+| `Questoes.html` / `Questoes.js` | Lista o banco de questões em cards paginados (20 por página), com badge de área, imagem e ações de editar/excluir. |
 | `Questao.html` / `Questao.js` | Formulário de cadastro/edição. Mesma tela para os dois casos: se a URL tem `?id=`, carrega e faz `PUT`; se não, faz `POST`. Também faz o upload da imagem. |
 | `Provas.html` / `Provas.js` | Lista as provas montadas. |
-| `Prova.html` / `Prova.js` | Composição da prova: busca questões no banco com filtro, adiciona/remove da seleção, define tempo limite e tema de redação. |
+| `Prova.html` / `Prova.js` | Composição da prova: busca questões no banco por palavra do enunciado (paginado), adiciona/remove da seleção, define turma, tempo limite e tema de redação. |
 | `TemasRedacao.html` / `TemasRedacao.js` | Lista os temas. |
 | `TemaRedacao.html` / `TemaRedacao.js` | Cadastro/edição de tema com texto motivador. |
 | `Redacoes.html` / `Redacoes.js` | Lista as redações entregues, marcando pendente ou corrigida. |
@@ -512,12 +511,13 @@ questão.
 ### 8.4 Composição da prova
 
 `Prova.js` mantém um array `questoesSelecionadas` com os IDs escolhidos. O professor busca
-questões com filtro por disciplina/assunto, clica em "Adicionar", e ao salvar o front envia:
+questões por palavra do enunciado (`GET /api/questoes?busca=...`, paginado 20 por página),
+clica em "Adicionar", e ao salvar o front envia:
 
 ```json
 {
   "titulo": "Simulado 1",
-  "disciplina": "Geral",
+  "turma": "101",
   "tempoLimiteMinutos": 180,
   "temaRedacaoId": 1,
   "QuestoesIds": [12, 47, 103]
@@ -938,14 +938,9 @@ Assumir isso na apresentação é sinal de domínio, não de fraqueza.
 2. **Algumas questões importadas têm tabelas em formato markdown no enunciado** (com `|`
    literais), porque não era viável revisar 535 questões uma a uma. É cosmético — o conteúdo
    está correto e legível.
-3. **`Disciplina` das questões de 2022–2024 repete a `Area`**, porque a fonte de dados só
-   informa a área ampla do ENEM, não a disciplina específica (Física vs. Química vs. Biologia).
-   As 4 questões curadas manualmente têm disciplina específica.
-4. **Banco criado com `EnsureCreated()`, sem migrations.** Ótimo para o escopo do trabalho
+3. **Banco criado com `EnsureCreated()`, sem migrations.** Ótimo para o escopo do trabalho
    (roda sem configuração), mas mudar o modelo exige recriar o banco em vez de aplicar uma
    migração incremental.
-5. **Sem paginação na listagem de questões.** Com 539 registros a tela ainda responde bem, mas
-   com dezenas de milhares seria necessário paginar.
 
 ### Possíveis evoluções
 

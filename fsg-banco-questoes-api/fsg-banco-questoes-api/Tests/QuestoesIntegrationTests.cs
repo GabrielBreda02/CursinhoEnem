@@ -18,12 +18,13 @@ public class QuestoesIntegrationTests : IntegrationTestBase
     {
         // Act
         var response = await _client.GetAsync("/api/questoes");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
-        var questoes = await response.Content.ReadFromJsonAsync<List<QuestaoListResponse>>();
+        var questoes = await response.Content.ReadFromJsonAsync<PaginacaoResponse<QuestaoListResponse>>();
         Assert.NotNull(questoes);
-        Assert.Empty(questoes);
+        Assert.Empty(questoes.Itens);
+        Assert.Equal(0, questoes.TotalItens);
     }
 
     [Fact]
@@ -33,10 +34,9 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         var createRequest = new CreateQuestaoRequest
         {
             Titulo = "Qual é a capital do Brasil?",
-            Disciplina = "Geografia",
             Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Capitais", "Brasil"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "São Paulo", Correta = false },
                 new CreateAlternativaRequest { Descricao = "Rio de Janeiro", Correta = false },
@@ -47,7 +47,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/questoes", createRequest);
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var createdResponse = await response.Content.ReadFromJsonAsync<CreatedResponse>();
@@ -63,10 +63,9 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         var createRequest = new CreateQuestaoRequest
         {
             Titulo = "Questão sem alternativa correta",
-            Disciplina = "Teste",
             Area = AreaConhecimento.Matematica,
             Assuntos = ["Teste"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "Alternativa A", Correta = false },
                 new CreateAlternativaRequest { Descricao = "Alternativa B", Correta = false }
@@ -75,7 +74,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/questoes", createRequest);
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -91,10 +90,9 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         var createRequest = new CreateQuestaoRequest
         {
             Titulo = "Teste questão",
-            Disciplina = "Teste",
             Area = AreaConhecimento.Matematica,
             Assuntos = ["Teste"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -106,13 +104,12 @@ public class QuestoesIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.GetAsync($"/api/questoes/{created!.Id}");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var questao = await response.Content.ReadFromJsonAsync<QuestaoDetailResponse>();
         Assert.NotNull(questao);
         Assert.Equal(createRequest.Titulo, questao.Titulo);
-        Assert.Equal(createRequest.Disciplina, questao.Disciplina);
         Assert.Equal(2, questao.Alternativas.Count);
     }
 
@@ -121,7 +118,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
     {
         // Act
         var response = await _client.GetAsync("/api/questoes/999");
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -137,10 +134,9 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         var createRequest = new CreateQuestaoRequest
         {
             Titulo = "Questão original",
-            Disciplina = "Original",
             Area = AreaConhecimento.Matematica,
             Assuntos = ["Original"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -153,10 +149,9 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         var updateRequest = new CreateQuestaoRequest
         {
             Titulo = "Questão atualizada",
-            Disciplina = "Atualizada",
             Area = AreaConhecimento.Matematica,
             Assuntos = ["Atualizada"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A atualizada", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B atualizada", Correta = false }
@@ -165,7 +160,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.PutAsJsonAsync($"/api/questoes/{created!.Id}", updateRequest);
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var updateResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -181,10 +176,9 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         var createRequest = new CreateQuestaoRequest
         {
             Titulo = "Questão para deletar",
-            Disciplina = "Teste",
             Area = AreaConhecimento.Matematica,
             Assuntos = ["Teste"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -196,7 +190,7 @@ public class QuestoesIntegrationTests : IntegrationTestBase
 
         // Act
         var response = await _client.DeleteAsync($"/api/questoes/{created!.Id}");
-        
+
         // Assert
         response.EnsureSuccessStatusCode();
         var deleteResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -206,16 +200,15 @@ public class QuestoesIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task GetQuestoes_ShouldFilterByDisciplina()
+    public async Task GetQuestoes_ShouldFilterByBusca()
     {
-        // Arrange - Criar questões de diferentes disciplinas
+        // Arrange - Criar questões com enunciados diferentes
         var matematica = new CreateQuestaoRequest
         {
-            Titulo = "Questão de Matemática",
-            Disciplina = "Matemática",
+            Titulo = "Questão de Matemática sobre álgebra",
             Area = AreaConhecimento.Matematica,
             Assuntos = ["Álgebra"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -224,11 +217,10 @@ public class QuestoesIntegrationTests : IntegrationTestBase
 
         var historia = new CreateQuestaoRequest
         {
-            Titulo = "Questão de História",
-            Disciplina = "História",
+            Titulo = "Questão de História sobre o Brasil Colonial",
             Area = AreaConhecimento.CienciasHumanas,
             Assuntos = ["Brasil Colonial"],
-            Alternativas = 
+            Alternativas =
             [
                 new CreateAlternativaRequest { Descricao = "A", Correta = true },
                 new CreateAlternativaRequest { Descricao = "B", Correta = false }
@@ -239,13 +231,44 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         await _client.PostAsJsonAsync("/api/questoes", historia);
 
         // Act
-        var response = await _client.GetAsync("/api/questoes?disciplina=Matemática");
-        
+        var response = await _client.GetAsync("/api/questoes?busca=álgebra");
+
         // Assert
         response.EnsureSuccessStatusCode();
-        var questoes = await response.Content.ReadFromJsonAsync<List<QuestaoListResponse>>();
+        var questoes = await response.Content.ReadFromJsonAsync<PaginacaoResponse<QuestaoListResponse>>();
         Assert.NotNull(questoes);
-        Assert.Single(questoes);
-        Assert.Equal("Matemática", questoes[0].Disciplina);
+        Assert.Single(questoes.Itens);
+        Assert.Contains("álgebra", questoes.Itens[0].Titulo, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetQuestoes_ShouldPaginate()
+    {
+        // Arrange - Criar 3 questões
+        for (var i = 1; i <= 3; i++)
+        {
+            var request = new CreateQuestaoRequest
+            {
+                Titulo = $"Questão paginada {i}",
+                Area = AreaConhecimento.Matematica,
+                Alternativas =
+                [
+                    new CreateAlternativaRequest { Descricao = "A", Correta = true },
+                    new CreateAlternativaRequest { Descricao = "B", Correta = false }
+                ]
+            };
+            await _client.PostAsJsonAsync("/api/questoes", request);
+        }
+
+        // Act
+        var response = await _client.GetAsync("/api/questoes?pagina=1&tamanhoPagina=2");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var questoes = await response.Content.ReadFromJsonAsync<PaginacaoResponse<QuestaoListResponse>>();
+        Assert.NotNull(questoes);
+        Assert.Equal(2, questoes.Itens.Count);
+        Assert.Equal(3, questoes.TotalItens);
+        Assert.Equal(2, questoes.TotalPaginas);
     }
 }

@@ -119,7 +119,6 @@ public class TentativasController : ControllerBase
             {
                 IdQuestao = q.IdQuestao,
                 Titulo = q.Titulo,
-                Disciplina = q.Disciplina,
                 Area = q.Area,
                 ImagemUrl = q.ImagemUrl,
                 Alternativas = q.Alternativas.Select(a => new AlternativaProvaResponse

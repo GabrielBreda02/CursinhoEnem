@@ -84,7 +84,7 @@ function criarCardQuestao(questao, index, alternativaSelecionadaId) {
     card.innerHTML = `
         <h4>${index + 1}. ${questao.titulo}</h4>
         ${imagemHtml}
-        <p style="font-size:0.85rem;color:#777;">${questao.area}</p>
+        <p style="font-size:0.85rem;color:#777;">${formatArea(questao.area)}</p>
         ${alternativasHtml}
     `;
 

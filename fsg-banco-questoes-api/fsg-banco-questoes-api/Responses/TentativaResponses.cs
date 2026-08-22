@@ -12,7 +12,6 @@ public class QuestaoProvaResponse
 {
     public int IdQuestao { get; set; }
     public string Titulo { get; set; } = string.Empty;
-    public string Disciplina { get; set; } = string.Empty;
     public string Area { get; set; } = string.Empty;
     public string? ImagemUrl { get; set; }
     public List<AlternativaProvaResponse> Alternativas { get; set; } = new();

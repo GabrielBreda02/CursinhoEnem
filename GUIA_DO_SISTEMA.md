@@ -19,10 +19,10 @@
 9. [Decisões técnicas e armadilhas resolvidas](#9-decisões-técnicas-e-armadilhas-resolvidas)
 10. [Testes automatizados](#10-testes-automatizados)
 11. [Segurança do sistema](#11-segurança-do-sistema)
-12. [Trilha de estudo em 5 sessões](#12-trilha-de-estudo-em-5-sessões)
-13. [Roteiro de demonstração](#13-roteiro-de-demonstração)
-14. [Perguntas prováveis e como responder](#14-perguntas-prováveis-e-como-responder)
-15. [Limitações conhecidas](#15-limitações-conhecidas)
+
+> Trilha de estudo, roteiro de demonstração, perguntas prováveis e limitações conhecidas
+> ficaram em `PREPARACAO_BANCA.md` (fora do controle de versão) — esse guia aqui é só a
+> documentação técnica do sistema.
 
 ---
 
@@ -393,7 +393,7 @@ que é o que permite filtrar o acervo por área com segurança.
 | `JwtTokenService.cs` | Gera o token assinado com as claims `sub` (id), `email`, `name`, `jti` e **`role`** (o tipo do usuário). |
 | `PasswordHasher.cs` | `Hash()` e `Verificar()` com PBKDF2-SHA256, salt aleatório de 16 bytes e 100.000 iterações. |
 
-**`Tests/`** — 16 testes de integração (detalhes em §10).
+**`Tests/`** — 17 testes de integração (detalhes em §10).
 
 ### Front-end · raiz do repositório
 
@@ -401,8 +401,8 @@ que é o que permite filtrar o acervo por área com segurança.
 
 | Arquivo | Função |
 |---|---|
-| `auth.js` | O núcleo do front. Define `API_BASE`, salva/lê a sessão no `localStorage`, expõe `ehProfessor()`/`ehAluno()`, o `authFetch()` (que injeta o token e trata 401) e o `renderNavbar()`. **Carregado por todas as páginas.** |
-| `Estilo.css` | Design system: paleta em variáveis CSS (índigo `#4f46e5` + âmbar), tipografia Inter, e os componentes (`.btn`, `.question-card`, `.navbar`, `.menu-card`, `.timer-badge`, `.badge-area`). |
+| `auth.js` | O núcleo do front. Define `API_BASE`, salva/lê a sessão no `localStorage`, expõe `ehProfessor()`/`ehAluno()`, o `authFetch()` (que injeta o token e trata 401) e o `renderNavbar()`. Também tem dois utilitários usados em várias telas: `formatArea()` (encurta o nome da área do ENEM só na exibição) e `criarControlesPaginacao()` (monta os botões de página). **Carregado por todas as páginas.** |
+| `Estilo.css` | Design system: paleta em variáveis CSS (índigo `#4f46e5` + âmbar), tipografia Inter, e os componentes (`.btn`, `.question-card`, `.navbar`, `.menu-card`, `.timer-badge`, `.badge-area`, `.paginacao`, `.toast`). As listagens (`.lista`, `.tabela-questoes`) usam CSS Grid responsivo (várias colunas em tela larga, uma no mobile); `.container-estreito` e `.form-compacto` mantêm campos de formulário numa largura de leitura confortável mesmo em telas largas (ver §9.8). |
 | `favicon.svg` | Ícone da aba. |
 | `index.html` | Menu principal. Um único arquivo que **monta o menu conforme o papel** de quem está logado: professor vê 4 cards, aluno vê 2, visitante vê entrar/cadastrar. |
 
@@ -420,7 +420,7 @@ que é o que permite filtrar o acervo por área com segurança.
 | `Questoes.html` / `Questoes.js` | Lista o banco de questões em cards paginados (20 por página), com badge de área, imagem e ações de editar/excluir. |
 | `Questao.html` / `Questao.js` | Formulário de cadastro/edição. Mesma tela para os dois casos: se a URL tem `?id=`, carrega e faz `PUT`; se não, faz `POST`. Também faz o upload da imagem. |
 | `Provas.html` / `Provas.js` | Lista as provas montadas. |
-| `Prova.html` / `Prova.js` | Composição da prova: busca questões no banco por palavra do enunciado (paginado), adiciona/remove da seleção, define turma, tempo limite e tema de redação. |
+| `Prova.html` / `Prova.js` | Composição da prova: busca questões no banco por palavra do enunciado e/ou área do ENEM (paginado), adiciona/remove da seleção com confirmação visual (toast + botão "✓ Adicionada"), define turma, tempo limite e tema de redação. |
 | `TemasRedacao.html` / `TemasRedacao.js` | Lista os temas. |
 | `TemaRedacao.html` / `TemaRedacao.js` | Cadastro/edição de tema com texto motivador. |
 | `Redacoes.html` / `Redacoes.js` | Lista as redações entregues, marcando pendente ou corrigida. |
@@ -511,8 +511,11 @@ questão.
 ### 8.4 Composição da prova
 
 `Prova.js` mantém um array `questoesSelecionadas` com os IDs escolhidos. O professor busca
-questões por palavra do enunciado (`GET /api/questoes?busca=...`, paginado 20 por página),
-clica em "Adicionar", e ao salvar o front envia:
+questões por palavra do enunciado e/ou área do ENEM (`GET /api/questoes?busca=...&area=...`,
+paginado 20 por página, os dois filtros são opcionais e combináveis). Ao clicar "Adicionar", a
+questão entra na seleção, aparece um toast de confirmação e o botão daquela questão vira
+"✓ Adicionada" (fica desabilitado, inclusive se a lista for refiltrada depois — o estado vem de
+`questoesSelecionadas.includes(idQuestao)` a cada render). Ao salvar, o front envia:
 
 ```json
 {
@@ -758,11 +761,36 @@ política CORS registrada no `Program.cs`, todo `fetch` seria bloqueado. A polí
 permissiva (`AllowAnyOrigin`), apropriada para desenvolvimento; em produção seria restrita ao
 domínio real do front.
 
+### 9.8 Aproveitamento de tela sem esticar formulários
+
+**Sintoma:** em monitores largos, o `.container` (largura fixa de 800px) deixava boa parte da
+tela vazia, e as listas de questões empilhavam um card embaixo do outro numa coluna só, mesmo
+havendo espaço de sobra pra mostrar várias lado a lado.
+
+**Por que não bastava aumentar o `max-width` de todo mundo:** campos de uma linha só (Título,
+Turma) usam `width: 100%` — se o container cresce, o input cresce junto. Um campo de texto de
+uma linha esticado até 1400px fica com cara de formulário quebrado, não de uso melhor do
+espaço.
+
+**Solução, em duas partes:**
+1. `.lista` e `.tabela-questoes` (as listagens de questões/provas/temas) viraram grades
+   responsivas com CSS Grid (`grid-template-columns: repeat(auto-fill, minmax(...), 1fr)`) —
+   quantas colunas couberem aparecem lado a lado, sem JavaScript nenhum controlando isso.
+2. Duas classes modificadoras em `Estilo.css` resolvem o resto:
+   - `.container-estreito` — volta o container pra 800px nas telas que são só formulário e não
+     têm grade nenhuma pra aproveitar espaço extra (login, cadastro, criar questão, etc.).
+   - `.form-compacto` — usada dentro de uma tela larga (como `Prova.html`) pra manter só o
+     bloco de campos numa faixa de 760px, enquanto o resto do container (a grade de questões)
+     usa a largura toda.
+
+Resultado: `.container`/`.navbar` cresceram de 800/900px pra 1400px por padrão, mas cada tela
+usa essa largura do jeito que faz sentido pro seu próprio conteúdo.
+
 ---
 
 ## 10. Testes automatizados
 
-**16 testes de integração** em xUnit — 8 para questões e 8 para provas.
+**17 testes de integração** em xUnit — 9 para questões e 8 para provas.
 
 Não são testes unitários com mocks: o `WebApplicationFactory<Program>` **sobe a aplicação
 inteira** e os testes conversam com ela por HTTP real, com o banco trocado por um provedor
@@ -776,8 +804,8 @@ inteira** e os testes conversam com ela por HTTP real, com o banco trocado por u
 - **Limpeza** — `Dispose()` apaga o banco em memória ao fim.
 
 O que os testes cobrem: listar vazio, criar com dados válidos, rejeitar questão sem alternativa
-correta, rejeitar dados inválidos, buscar por ID inexistente, atualizar, excluir, e prova com
-questão inexistente.
+correta, rejeitar dados inválidos, buscar por ID inexistente, buscar por palavra no enunciado,
+paginar, atualizar, excluir, e prova com questão inexistente.
 
 ---
 
@@ -798,163 +826,6 @@ Resumo para citar de forma organizada:
 | Sessão expirada em uso | `authFetch` intercepta 401, limpa o `localStorage` e redireciona ao login |
 | Dados inválidos chegando ao banco | Atributos de validação nos Requests + validações de negócio nos controllers |
 
-**Honestidade técnica** (mostra maturidade, e é melhor você levantar antes da banca): a chave
-JWT está no `appsettings.json` versionado, o que é aceitável em trabalho acadêmico mas em
-produção iria para variável de ambiente ou cofre de segredos. E o CORS está aberto, o que
-também mudaria em produção.
-
----
-
-## 12. Trilha de estudo em 5 sessões
-
-Ordem pensada para o entendimento se construir camada sobre camada. Faça com o projeto rodando
-e o Swagger aberto ao lado.
-
-### Sessão 1 — Ver funcionando antes de ler código
-Suba a API e o front. Entre como professor, olhe as questões, abra uma com imagem. Saia, entre
-como aluno, faça o simulado de exemplo inteiro (responda, escreva a redação, finalize, veja o
-resultado). Volte como professor e corrija a redação. Volte como aluno e veja a nota aparecer.
-**Objetivo:** ter o produto na cabeça antes do código.
-
-### Sessão 2 — O domínio
-Leia, nesta ordem: `Models/Usuario.cs`, `Questao.cs`, `Alternativa.cs`, `Prova.cs`,
-`TemaRedacao.cs`, `TentativaProva.cs`, `RespostaAluno.cs`. Depois
-`Data/BancoQuestoesContext.cs` inteiro.
-**Objetivo:** desenhar o diagrama de entidades de memória, num papel.
-
-### Sessão 3 — Autenticação e autorização
-`Security/PasswordHasher.cs` → `Security/JwtTokenService.cs` → `Controllers/AuthController.cs`
-→ o trecho de JWT em `Program.cs` → `auth.js` no front.
-**Teste prático:** faça login pelo Swagger, copie o token, cole em [jwt.io] e veja as claims.
-Depois tente `POST /api/questoes` sem token (401) e com token de aluno (403).
-**Objetivo:** explicar o ciclo completo do token, do login até o `[Authorize]`.
-
-### Sessão 4 — O fluxo da prova
-`Controllers/TentativasController.cs` inteiro, método a método, com
-`Responses/TentativaResponses.cs` aberto ao lado. Depois `FazerProva.js` e `ResultadoProva.js`.
-**Objetivo:** explicar por que o gabarito não vaza e por que o cronômetro não é burlável.
-
-### Sessão 5 — O entorno
-`Controllers/RedacoesController.cs`, `Data/DbSeeder.cs`, `Program.cs` inteiro (a ordem do
-pipeline importa), e a seção §9 deste guia.
-**Objetivo:** conseguir responder "por que isso está assim?" para qualquer decisão do projeto.
-
-### Exercícios de fixação
-
-Se conseguir fazer estes sem consultar, você domina o sistema:
-
-1. Onde eu mudaria o sistema para uma questão poder ter mais de uma imagem?
-2. Que arquivos eu tocaria para adicionar um campo "dificuldade" na questão? (Model → Context →
-   Request → Response → Controller → front)
-3. Por que `TentativaProva.ExpiraEm` existe, se dá para calcular `IniciadoEm + TempoLimite`?
-4. O que acontece se dois alunos fizerem a mesma prova ao mesmo tempo?
-5. Por que `Prova` usa `DeleteBehavior.Restrict` e `Questao` usa `Cascade`?
-
----
-
-## 13. Roteiro de demonstração
-
-Sugestão para 10–12 minutos, na ordem que conta uma história.
-
-| Tempo | O que fazer | O que dizer |
-|---|---|---|
-| 0–1 min | Slide/fala de abertura | O ponto de partida (banco de questões genérico) e o pivô para plataforma de simulados do ENEM |
-| 1–2 min | Mostrar `index.html` logado como professor e depois como aluno | "O menu é montado conforme o papel — mas isso é conveniência; a permissão real está no servidor" |
-| 2–4 min | Banco de questões: filtrar por área, abrir uma questão com imagem | Acervo de 539 questões reais, com fonte e ano citados |
-| 4–5 min | Montar (ou mostrar montada) uma prova com tempo e tema de redação | Reuso das questões: relação muitos-para-muitos |
-| 5–8 min | **Fazer o simulado como aluno** — responder, mostrar o cronômetro, escrever a redação, finalizar, ver o resultado | O ponto alto. Aqui é onde o sistema deixa de ser CRUD |
-| 8–9 min | Abrir o DevTools na aba Network durante a prova e mostrar que o gabarito não vem no JSON | Demonstração concreta de segurança |
-| 9–10 min | Corrigir a redação como professor e ver a nota no resultado do aluno | Ciclo fechado entre os dois papéis |
-| 10–11 min | Swagger + rodar `dotnet test` | Documentação automática e 16 testes passando |
-| 11–12 min | Fechamento | Limitações conhecidas e próximos passos (§15) — mostra consciência do próprio trabalho |
-
-**Prepare antes:** os dois navegadores/janelas já logados (um professor, um aluno) para não
-perder tempo com login; uma prova curta cadastrada, para dar tempo de finalizar ao vivo.
-
----
-
-## 14. Perguntas prováveis e como responder
-
-**"Por que ASP.NET Core e não Node/Java/PHP?"**
-Tipagem estática ajuda em sistema com regra de negócio (o compilador pega erro de contrato
-antes de rodar), o framework já traz autenticação, autorização por papel, injeção de
-dependência e documentação automática sem biblioteca externa, e o EF Core mantém o modelo de
-dados no próprio código.
-
-**"Por que SQLite e não SQL Server/MySQL?"**
-Para o escopo acadêmico, o ganho de qualquer pessoa clonar e rodar sem instalar nada supera a
-necessidade de um servidor de banco. Como é EF Core, trocar o provedor é mudar a linha
-`UseSqlite(...)` para `UseSqlServer(...)` e ajustar a connection string — o resto do código não
-muda. Esse é justamente o valor do ORM.
-
-**"Por que JavaScript puro no front?"**
-O front é essencialmente formulários e listas consumindo a API. Um framework traria build,
-dependências e complexidade sem benefício proporcional. O foco do trabalho é a API e a regra de
-negócio.
-
-**"E se o aluno abrir o DevTools e procurar a resposta?"**
-Não encontra. Durante a prova a API responde com `AlternativaProvaResponse`, que só tem `id` e
-`descricao`. O campo `Correta` só aparece no `GET /api/tentativas/{id}`, que exige a tentativa
-finalizada. Dá para demonstrar ao vivo na aba Network.
-
-**"E se ele mudar o relógio do computador?"**
-Só muda a exibição do cronômetro. O prazo real está gravado no banco e é comparado com o
-relógio do servidor a cada resposta enviada.
-
-**"E se ele fechar o navegador no meio?"**
-Duas coisas: as respostas já dadas estão salvas (cada clique é um `PUT` imediato), e ao voltar
-a mesma tentativa é retomada com o prazo original. Se o prazo já tiver estourado, o sistema
-fecha a tentativa automaticamente com a nota parcial.
-
-**"Como o sistema calcula a nota?"**
-As objetivas, automaticamente no servidor: conta as respostas cuja alternativa selecionada tem
-`Correta = true`. A redação, manualmente pelo professor, na escala de 0 a 1000 do ENEM, com
-comentário. É a divisão que corresponde ao processo real.
-
-**"Onde estão os testes e o que eles cobrem?"**
-16 testes de integração em xUnit que sobem a aplicação real com banco em memória e testam por
-HTTP: criação com dados válidos, rejeição de dados inválidos (questão sem alternativa correta,
-prova com questão inexistente), busca, atualização e exclusão.
-
-**"Como adicionar mais questões do ENEM?"**
-Editando `Data/Seed/questoes_enem.json` e seguindo o mesmo formato — não exige alterar código.
-Ou pela tela de cadastro, para questões autorais.
-
-**"O sistema está pronto para produção?"**
-Não sem ajustes, e sei quais: a chave JWT precisa sair do arquivo versionado para variável de
-ambiente, o CORS precisa ser restrito ao domínio real, e o banco deveria migrar para um SGBD
-servidor com migrations em vez de `EnsureCreated()`. A arquitetura suporta as três mudanças
-sem reescrita.
-
----
-
-## 15. Limitações conhecidas
-
-Assumir isso na apresentação é sinal de domínio, não de fraqueza.
-
-1. **Uma questão suporta apenas uma imagem** (`ImagemUrl` é um campo único). Algumas questões
-   de 2022–2024 tinham dois gráficos complementares na fonte; só a primeira imagem foi
-   importada.
-2. **Algumas questões importadas têm tabelas em formato markdown no enunciado** (com `|`
-   literais), porque não era viável revisar 535 questões uma a uma. É cosmético — o conteúdo
-   está correto e legível.
-3. **Banco criado com `EnsureCreated()`, sem migrations.** Ótimo para o escopo do trabalho
-   (roda sem configuração), mas mudar o modelo exige recriar o banco em vez de aplicar uma
-   migração incremental.
-
-### Possíveis evoluções
-
-- Turmas: professor agrupa alunos e atribui simulados a uma turma específica
-- Relatórios de desempenho por área, para o aluno identificar onde está fraco
-- Correção da redação pelas 5 competências do ENEM, em vez de nota única
-- Sorteio automático de simulado (ex.: "monte uma prova com 45 questões aleatórias por área")
-- Múltiplas imagens por questão
-
----
-
-## Resumo de uma frase
-
-**CursinhoEnem é uma API REST em ASP.NET Core 8 com front-end em JavaScript puro, onde
-professores montam simulados a partir de um acervo de 539 questões reais do ENEM e alunos os
-executam com cronômetro e redação — com o servidor controlando prazo, gabarito e correção
-automática, e o professor corrigindo a redação.**
+Sobre a chave JWT versionada em `appsettings.json` e o CORS aberto: aceitável em escopo
+acadêmico, mudaria em produção (variável de ambiente / cofre de segredos, e domínio restrito) —
+ver "honestidade técnica" em `PREPARACAO_BANCA.md`.

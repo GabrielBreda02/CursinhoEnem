@@ -10,8 +10,11 @@
 *.db-shm
 *.db-wal
 
-# Configuração local do Claude Code (preview/testes)
+# Configuração local de ferramentas de desenvolvimento (preview/testes)
 .claude/
+
+# Material pessoal de estudo/apresentação, não é documentação do sistema
+PREPARACAO_BANCA.md
 
 # Imagens enviadas pelos professores (conteúdo gerado, não versionado)
 fsg-banco-questoes-api/fsg-banco-questoes-api/wwwroot/uploads/

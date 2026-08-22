@@ -148,7 +148,14 @@ public class TurmasController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), 404)]
     public async Task<ActionResult<ApiResponse>> DeleteTurma(int id)
     {
-        var turma = await _context.Turmas.FindAsync(id);
+        // Carrega Alunos/Provas antes de remover: o SetNull configurado no DbContext precisa
+        // dessas coleções já rastreadas em memória pra zerar o TurmaId de cada uma — sem o
+        // Include, a FK só ficaria correta por acaso, dependendo do provider de banco.
+        var turma = await _context.Turmas
+            .Include(t => t.Alunos)
+            .Include(t => t.Provas)
+            .FirstOrDefaultAsync(t => t.IdTurma == id);
+
         if (turma == null)
         {
             return NotFound(new ApiResponse { Message = $"Turma com ID {id} não encontrada", Success = false });

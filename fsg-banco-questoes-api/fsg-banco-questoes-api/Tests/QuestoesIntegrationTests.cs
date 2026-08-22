@@ -271,4 +271,75 @@ public class QuestoesIntegrationTests : IntegrationTestBase
         Assert.Equal(3, questoes.TotalItens);
         Assert.Equal(2, questoes.TotalPaginas);
     }
+
+    private async Task CriarQuestoesNaAreaAsync(string area, int quantidade)
+    {
+        for (var i = 1; i <= quantidade; i++)
+        {
+            await _client.PostAsJsonAsync("/api/questoes", new CreateQuestaoRequest
+            {
+                Titulo = $"Questão {area} {i}",
+                Area = area,
+                Alternativas =
+                [
+                    new CreateAlternativaRequest { Descricao = "A", Correta = true },
+                    new CreateAlternativaRequest { Descricao = "B", Correta = false }
+                ]
+            });
+        }
+    }
+
+    [Fact]
+    public async Task Sortear_ShouldReturnQuestoesFromEachArea()
+    {
+        // Arrange - 3 questões em cada uma das 4 áreas
+        await CriarQuestoesNaAreaAsync(AreaConhecimento.Linguagens, 3);
+        await CriarQuestoesNaAreaAsync(AreaConhecimento.CienciasHumanas, 3);
+        await CriarQuestoesNaAreaAsync(AreaConhecimento.CienciasNatureza, 3);
+        await CriarQuestoesNaAreaAsync(AreaConhecimento.Matematica, 3);
+
+        // Act
+        var response = await _client.GetAsync("/api/questoes/sortear?porArea=3");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var ids = await response.Content.ReadFromJsonAsync<List<int>>();
+        Assert.Equal(12, ids!.Count);
+        Assert.Equal(ids.Count, ids.Distinct().Count());
+    }
+
+    [Fact]
+    public async Task Sortear_ShouldReturnFewerThanRequested_WhenAreaHasNotEnoughQuestoes()
+    {
+        // Arrange - só 1 questão, numa única área
+        await CriarQuestoesNaAreaAsync(AreaConhecimento.Matematica, 1);
+
+        // Act
+        var response = await _client.GetAsync("/api/questoes/sortear?porArea=5");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var ids = await response.Content.ReadFromJsonAsync<List<int>>();
+        Assert.Single(ids!);
+    }
+
+    [Fact]
+    public async Task Sortear_ShouldReturnBadRequest_WhenPorAreaIsInvalid()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/questoes/sortear?porArea=0");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Sortear_ShouldReturnForbidden_ForAluno()
+    {
+        // Act
+        var response = await _alunoClient.GetAsync("/api/questoes/sortear?porArea=5");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }

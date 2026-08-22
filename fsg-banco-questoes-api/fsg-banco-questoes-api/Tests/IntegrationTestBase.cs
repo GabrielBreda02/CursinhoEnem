@@ -11,8 +11,13 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
 {
     protected readonly WebApplicationFactory<Program> _factory;
     protected readonly HttpClient _client;
+    protected readonly HttpClient _alunoClient;
     protected readonly string _dbName;
-    
+
+    /// <summary>ID do aluno de teste logado em <see cref="_alunoClient"/> — útil pra matricular
+    /// esse aluno numa turma ou conferir visibilidade de provas por turma.</summary>
+    protected int AlunoId { get; private set; }
+
     public IntegrationTestBase(WebApplicationFactory<Program> factory)
     {
         _dbName = Guid.NewGuid().ToString();
@@ -38,7 +43,8 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
         });
         
         _client = _factory.CreateClient();
-        
+        _alunoClient = _factory.CreateClient();
+
         // Inicializa o banco de dados
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<BancoQuestoesContext>();
@@ -67,6 +73,29 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
 
         var login = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login!.Token);
+
+        // Aluno de teste, pra fluxos que exigem papel Aluno (fazer prova, ver provas da própria
+        // turma) — mesma ideia do professor acima, num cliente HTTP separado.
+        var registroAluno = await _client.PostAsJsonAsync("/api/auth/registrar", new RegistrarUsuarioRequest
+        {
+            Nome = "Aluno Teste",
+            Email = "aluno.tests@teste.com",
+            Senha = "senha123",
+            Tipo = "Aluno"
+        });
+        registroAluno.EnsureSuccessStatusCode();
+        var alunoCriado = await registroAluno.Content.ReadFromJsonAsync<CreatedResponse>();
+        AlunoId = alunoCriado!.Id;
+
+        var loginAlunoResponse = await _alunoClient.PostAsJsonAsync("/api/auth/login", new LoginRequest
+        {
+            Email = "aluno.tests@teste.com",
+            Senha = "senha123"
+        });
+        loginAlunoResponse.EnsureSuccessStatusCode();
+
+        var loginAluno = await loginAlunoResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        _alunoClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginAluno!.Token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -77,5 +106,6 @@ public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
         var context = scope.ServiceProvider.GetRequiredService<BancoQuestoesContext>();
         context.Database.EnsureDeleted();
         _client?.Dispose();
+        _alunoClient?.Dispose();
     }
 } 

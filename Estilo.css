@@ -248,6 +248,35 @@ button:active,
 }
 
 /* ===============================
+   Toast (confirmação rápida, ex.: questão adicionada à prova)
+================================= */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: var(--success);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-hover);
+    font-weight: 600;
+    font-size: 0.92rem;
+    z-index: 1000;
+    animation: toast-entrar 0.2s ease, toast-sair 0.2s ease 2.3s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes toast-entrar {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-sair {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* ===============================
    Formulários Gerais
 ================================= */
 .formulario,

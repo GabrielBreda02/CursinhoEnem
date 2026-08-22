@@ -6,6 +6,7 @@ const turmaInput = document.getElementById("turma");
 const tempoLimiteInput = document.getElementById("tempoLimite");
 const temaRedacaoSelect = document.getElementById("temaRedacao");
 const filtroBuscaInput = document.getElementById("filtroBusca");
+const filtroAreaInput = document.getElementById("filtroArea");
 const listaBanco = document.getElementById("tabelaQuestoes");
 const listaSelecionadas = document.getElementById("tabelaSelecionadas");
 const paginacaoQuestoesContainer = document.getElementById("paginacaoQuestoes");
@@ -49,6 +50,10 @@ function buscarQuestoes(pagina = 1) {
     if (busca) {
         query.set("busca", busca);
     }
+    const area = filtroAreaInput.value;
+    if (area) {
+        query.set("area", area);
+    }
 
     fetch(`${API_BASE}/questoes?${query.toString()}`, {
         method: "GET"
@@ -64,11 +69,12 @@ function buscarQuestoes(pagina = 1) {
             questoes.forEach(questao => {
                 const div = document.createElement("div");
                 div.className = "question-card";
+                const jaAdicionada = questoesSelecionadas.includes(questao.idQuestao);
 
                 div.innerHTML = `
                     ${questao.area ? `<span class="badge-area">${formatArea(questao.area)}</span>` : ""}
                     <h4>${questao.titulo}</h4>
-                    <button onclick="adicionarQuestao(${questao.idQuestao})" class="btn">Adicionar</button>
+                    <button type="button" class="btn" onclick="adicionarQuestao(${questao.idQuestao}, this)" ${jaAdicionada ? "disabled" : ""}>${jaAdicionada ? "✓ Adicionada" : "Adicionar"}</button>
                 `;
 
                 listaBanco.appendChild(div);
@@ -79,11 +85,34 @@ function buscarQuestoes(pagina = 1) {
         });
 }
 
-function adicionarQuestao(idQuestao) {
-    if (!questoesSelecionadas.includes(idQuestao)) {
-        questoesSelecionadas.push(idQuestao);
-        carregarQuestoesSelecionadas();
+function adicionarQuestao(idQuestao, botao) {
+    if (questoesSelecionadas.includes(idQuestao)) {
+        return;
     }
+
+    questoesSelecionadas.push(idQuestao);
+    carregarQuestoesSelecionadas();
+
+    if (botao) {
+        botao.textContent = "✓ Adicionada";
+        botao.disabled = true;
+    }
+
+    mostrarToast("Questão adicionada à prova.");
+}
+
+function mostrarToast(mensagem) {
+    const existente = document.querySelector(".toast");
+    if (existente) {
+        existente.remove();
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = mensagem;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 2500);
 }
 
 function removerQuestao(idQuestao) {

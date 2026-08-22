@@ -164,18 +164,6 @@ dois papéis) antes de cada commit.
   print()/terminal (o console do Windows corrompe acento em UTF-8 na exibição, mesmo com o
   arquivo em disco intacto — sempre validar o arquivo real, não a tela).
 
-## Regras importantes — não esquecer
-
-- **Nunca incluir menção a IA em commits ou arquivos deste projeto** (pedido explícito do
-  usuário, é trabalho de faculdade). Isso inclui: **não usar o rodapé
-  `Co-Authored-By: Claude ...`** nos commits (diferente do padrão default). Já tivemos que
-  limpar o histórico do repo original uma vez por causa disso — não repetir.
-- `.claude/` é config local de ferramenta, sempre fica de fora do git (`.gitignore` já cobre)
-- O `gh` CLI está instalado na máquina mas raramente continua autenticado entre sessões — usar
-  `git` puro funciona bem (push direto via credential manager do Windows, sem precisar de
-  token)
-- Bancos `.db`/`.db-shm`/`.db-wal` e `bin/`/`obj/` são sempre gitignored — nunca commitar
-
 ## Pendências conhecidas / possíveis próximos passos
 
 - **Algumas questões 2022-2024 têm formatação de tabela em markdown no enunciado** (ex.: dados
@@ -187,9 +175,3 @@ dois papéis) antes de cada commit.
   foi importada. Não travou nenhuma questão, mas quem for revisar o acervo pode achar um caso ou
   outro em que falta contexto visual.
 - Nenhuma dessas pendências bloqueia o uso do sistema — são possíveis evoluções futuras.
-
-## Depois que o produto estiver pronto
-
-O usuário vai precisar da documentação completa do projeto (TAP + documentação do trabalho de
-faculdade) e ainda vai mandar exemplos/modelos pra seguir como referência de formato antes disso
-começar — não adiantar essa parte sozinho sem os exemplos.

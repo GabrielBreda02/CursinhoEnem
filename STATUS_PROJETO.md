@@ -101,9 +101,9 @@ de redação e 1 prova de exemplo montada (1 questão de cada área).
     seeder e testes, back e front) — era redundante com `Area` pra 535 das 539 questões (ver
     §Observações abaixo). `Questao.html` também perdeu o campo `Assuntos` do formulário (a
     propriedade continua existindo no model/API pra quem já tinha assunto cadastrado, só não é
-    mais preenchida manualmente). `Prova` ganhou um campo `Turma` (string opcional) no lugar —
-    antes existia um input "Turma/Semestre" na tela que nem chegava a ser salvo, agora persiste
-    de verdade
+    mais preenchida manualmente). `Prova` ganhou um campo `Turma` (string opcional, depois
+    virou `TurmaId` — ver item 14) no lugar — antes existia um input "Turma/Semestre" na tela
+    que nem chegava a ser salvo, agora persiste de verdade
 12. **Busca por palavra no enunciado + paginação** — `GET /api/questoes` agora aceita
     `busca` (contém no `Titulo`, substitui os antigos filtros por disciplina/assunto),
     `pagina` e `tamanhoPagina` (padrão 20), devolvendo um envelope
@@ -113,6 +113,26 @@ de redação e 1 prova de exemplo montada (1 questão de cada área).
     compartilhado em `auth.js`. Os nomes das áreas do ENEM também foram encurtados na exibição
     (`formatArea()` em `auth.js` tira o "e suas Tecnologias") — o valor salvo no banco continua
     o nome oficial completo
+13. **Filtro por área + confirmação visual na composição de prova** — `GET /api/questoes`
+    ganhou o parâmetro `area`, combinável com `busca`. Ao adicionar uma questão à prova aparece
+    um toast ("Questão adicionada à prova.") e o botão daquela questão vira "✓ Adicionada"
+    (desabilitado), inclusive depois de refiltrar
+14. **Turmas de verdade** — nova entidade `Turma` (`Models/Turma.cs`, `TurmasController`,
+    `api/turmas`). Professor cria turmas, matricula/remove alunos (`Usuario.TurmaId`) e atribui
+    uma prova a uma turma (`Prova.TurmaId`, substituindo o campo texto solto do item 11). Aluno
+    só vê provas abertas (`TurmaId == null`) ou da própria turma — `GET /api/Provas` filtra por
+    papel, e `POST /api/tentativas/iniciar` confere de novo no servidor (403 se a turma não
+    bater), não é só esconder da lista. `DbSeeder` ganhou uma turma de exemplo com o aluno de
+    teste já matriculado
+15. **Correção de redação pelas 5 competências do ENEM** — `TentativaProva` trocou o campo
+    `NotaRedacao` gravado por `NotaComp1`..`NotaComp5` (0-200 cada, múltiplos de 20, validado no
+    controller) mais uma propriedade calculada `NotaRedacao` (soma das 5, `entity.Ignore` no
+    `DbContext`, não é coluna). `CorrigirRedacao.html` mostra os 5 campos com total em tempo
+    real; `ResultadoProva.html` mostra o detalhamento pro aluno, não só o total
+16. **Sorteio automático de questões por área** — `GET /api/questoes/sortear?porArea=N` busca
+    os IDs de cada uma das 4 áreas, embaralha em memória (não dá pra embaralhar via SQL/EF sem
+    cair em avaliação client-side) e devolve N de cada. `Prova.html` soma o resultado à seleção
+    atual com um toast de confirmação
 
 Todas as fases foram testadas por `curl`/script Python e pelo navegador (fluxo completo dos
 dois papéis) antes de cada commit.
@@ -174,4 +194,10 @@ dois papéis) antes de cada commit.
   questões 2022-2024 tinha 2 imagens na fonte (ex.: dois gráficos complementares); só a primeira
   foi importada. Não travou nenhuma questão, mas quem for revisar o acervo pode achar um caso ou
   outro em que falta contexto visual.
+- **Turmas, sorteio de questões e correção por competências (itens 14-16) não têm testes
+  automatizados ainda** — os 17 `[Fact]` existentes cobrem só Questões e Provas. As três telas
+  novas foram testadas manualmente (fluxo completo com o navegador) antes de cada commit, mas
+  não têm cobertura de regressão no `BancoQuestoes.Tests`.
+- **`Usuario.TurmaId` é uma FK simples** — um aluno só pode estar em uma turma por vez. Suficiente
+  pro caso de uso atual, mas não modela aluno em duas turmas ao mesmo tempo (viraria N:N).
 - Nenhuma dessas pendências bloqueia o uso do sistema — são possíveis evoluções futuras.

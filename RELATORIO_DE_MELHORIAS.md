@@ -15,6 +15,9 @@
 | Banco de questões | Scroll infinito trocado por paginação (20 por página); campo Disciplina removido do sistema inteiro |
 | Composição de prova | Filtro por disciplina/assunto trocado por busca por palavra no enunciado + filtro por área; confirmação visual ao adicionar questão; campo Turma passou a ser salvo de verdade |
 | Layout | Containers mais largos e listas de questões em grade responsiva (várias colunas) — bem menos espaço de tela desperdiçado em monitores largos |
+| Turmas | Professor agrupa alunos em turmas e atribui provas a uma turma específica — aluno só vê (e só consegue iniciar) provas da própria turma ou provas abertas |
+| Correção de redação | Nota única trocada pelas 5 competências do ENEM (0-200 cada), como na correção oficial |
+| Composição de prova | Sorteio automático de questões por área, pra montar uma prova balanceada em um clique |
 
 ---
 
@@ -115,7 +118,47 @@ várias lado a lado.
   questões, só a parte de formulário ficou numa faixa mais estreita (760px) — a grade de questões
   usa a largura total disponível.
 
-## 8. Problemas técnicos enfrentados no caminho (fora do código em si)
+## 8. Turmas — professor agrupa alunos e atribui provas
+
+**Problema:** o campo "Turma" da prova era só um texto livre (nem chegava a ser salvo, ver item
+6) e não existia nenhuma noção real de "quais alunos pertencem a qual turma". Isso significa que
+toda prova cadastrada ficava visível pra **todos** os alunos, sem jeito de restringir um simulado
+a uma turma específica — algo essencial pra um cursinho de verdade, onde turmas diferentes podem
+estar em pontos diferentes do conteúdo.
+
+**O que foi feito:** criada uma entidade Turma de verdade. O professor cria turmas, matricula e
+remove alunos delas (tela "Turmas"), e ao montar uma prova escolhe a turma à qual ela se destina
+(ou deixa aberta pra qualquer aluno). No lado do aluno, a lista de provas disponíveis mostra só
+provas abertas ou da turma dele — e isso não é só cosmético: mesmo que um aluno tente iniciar
+uma prova de outra turma sabendo o link direto, o servidor recusa (403), porque a validação real
+está na API, não só escondendo o botão na tela (mesmo princípio de segurança já usado no resto
+do sistema).
+
+## 9. Correção de redação pelas 5 competências do ENEM
+
+**Problema:** a correção da redação era uma nota única de 0 a 1000, dada de uma vez só. A
+correção oficial do ENEM não funciona assim — ela avalia 5 competências separadas (domínio da
+norma culta, compreensão do tema, argumentação, coesão textual e proposta de intervenção), cada
+uma valendo até 200 pontos, em múltiplos de 20. Uma nota única esconde onde o aluno está bem e
+onde precisa melhorar.
+
+**O que foi feito:** a tela de correção agora pede as 5 notas separadamente (com validação de
+que cada uma é múltiplo de 20, como no ENEM oficial), mostra o total somado em tempo real
+enquanto o professor digita, e o resultado que o aluno vê mostra o detalhamento das 5
+competências, não só o total — mais próximo da devolutiva que ele teria numa correção real.
+
+## 10. Sorteio automático de questões por área
+
+**Problema:** montar uma prova balanceada entre as 4 áreas do ENEM (por exemplo, uma prova nos
+moldes do ENEM real, com uma quantidade fixa de questões de cada área) exigia escolher questão
+por questão manualmente no banco de 539 questões.
+
+**O que foi feito:** um botão "Sortear questões" que, dado um número (ex.: 45), busca essa
+quantidade de questões aleatórias de **cada** uma das 4 áreas e já adiciona todas à prova de
+uma vez, com uma única confirmação ("180 questões sorteadas e adicionadas"). O professor ainda
+pode remover ou adicionar questões manualmente depois — o sorteio só dá o ponto de partida.
+
+## 11. Problemas técnicos enfrentados no caminho (fora do código em si)
 
 Dois problemas de ambiente, não de código, valem registrar porque tomaram tempo de diagnóstico:
 

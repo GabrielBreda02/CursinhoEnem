@@ -57,7 +57,7 @@ coração da apresentação:
 O repositório original foi mantido intocado (representa a entrega anterior) e este é um
 repositório novo, com o produto evoluído.
 
-### As 10 adições que compõem a evolução
+### As 13 adições que compõem a evolução
 
 Essa é a lista que vale decorar — cada item tem uma seção detalhada mais adiante.
 
@@ -72,13 +72,21 @@ Essa é a lista que vale decorar — cada item tem uma seção detalhada mais ad
    com questões reais citando ano e fonte.
 6. **Repaginação visual** — design system em `Estilo.css`, navbar consistente, menu em cards,
    favicon.
-7. **Suíte de testes corrigida** — 16 testes de integração compilando e passando.
+7. **Suíte de testes corrigida** — 17 testes de integração compilando e passando.
 8. **Correção de redação pelo professor** — `RedacoesController` + telas de lista e de
-   correção (nota 0–1000 e comentário), visível ao aluno no resultado.
+   correção pelas 5 competências do ENEM (0–200 cada, mais comentário), visível ao aluno no
+   resultado.
 9. **Retomar prova em andamento** — atualizar a página não reinicia o cronômetro nem perde as
    respostas já dadas.
 10. **Acervo ampliado para 539 questões** — 2022, 2023 e 2024 completos (menos as anuladas),
     142 delas com imagem versionada no repositório.
+11. **Turmas** — professor agrupa alunos em turmas e atribui provas a uma turma específica;
+    aluno só vê e só consegue iniciar provas abertas ou da própria turma (validado no servidor).
+12. **Sorteio automático de questões** — monta uma prova balanceada sorteando N questões de
+    cada área do ENEM de uma vez.
+13. **Aproveitamento de tela (responsividade)** — grades de cards com várias colunas e
+    containers mais largos nas telas de listagem, mantendo formulários numa largura legível
+    (ver §9.8).
 
 ---
 
@@ -260,22 +268,23 @@ marca a alternativa B na questão 12.
 
 ## 6. Modelo de dados
 
-### As sete entidades
+### As oito entidades
 
 ```
-Usuario                    TemaRedacao
-  IdUsuario                  IdTemaRedacao
-  Nome                       Titulo
-  Email (único)              TextoMotivador
+Usuario                    TemaRedacao                Turma
+  IdUsuario                  IdTemaRedacao               IdTurma
+  Nome                       Titulo                      Nome
+  Email (único)              TextoMotivador             (1 turma tem N alunos e N provas)
   SenhaHash                  Ano
   Tipo ("Professor"/"Aluno") Fonte
+  TurmaId (opcional)
                                   │
                                   │ 0..1
                                   ▼
 Questao  ◄──── N:N ────►  Prova
   IdQuestao                 IdProva
   Titulo (o enunciado)      Titulo
-  AssuntosJson              Turma (opcional)
+  AssuntosJson              TurmaId (opcional — nulo = aberta pra qualquer aluno)
   Area (uma das 4 do ENEM)  TempoLimiteMinutos
   ImagemUrl                 TemaRedacaoId
   Ano / Fonte
@@ -296,8 +305,9 @@ TentativaProva                     RespostaAluno
   ExpiraEm        ← prazo do servidor
   FinalizadoEm    ← nulo = em andamento
   TextoRedacao
-  NotaObjetivas   ← calculada ao finalizar
-  NotaRedacao     ← 0-1000, dada pelo professor
+  NotaObjetivas        ← calculada ao finalizar
+  NotaComp1..NotaComp5 ← as 5 competências do ENEM, 0-200 cada, múltiplos de 20
+  NotaRedacao          ← calculada (soma das 5 competências), não é coluna do banco
   ComentarioRedacao
 ```
 
@@ -309,6 +319,9 @@ TentativaProva                     RespostaAluno
   a questão é reutilizável.
 - **Questao → Alternativa é 1:N com `DeleteBehavior.Cascade`.** Apagar a questão apaga as
   alternativas dela — alternativa órfã não faz sentido.
+- **Turma → Usuario e Turma → Prova são 1:N com `DeleteBehavior.SetNull`.** Apagar uma turma
+  não apaga os alunos nem as provas dela — eles só ficam sem turma (`TurmaId = null`), voltando
+  a ser "abertos"/sem vínculo em vez de sumirem.
 - **TentativaProva → Prova/Usuario usa `DeleteBehavior.Restrict`.** O oposto do caso anterior:
   o banco **impede** apagar uma prova que já foi respondida por alguém, para não destruir
   histórico.
@@ -316,7 +329,21 @@ TentativaProva                     RespostaAluno
   de que o aluno não tem duas respostas para a mesma questão na mesma tentativa. Quando ele
   troca de alternativa, o registro é atualizado, não duplicado.
 
-### Dois detalhes de modelagem que rendem pergunta
+### Três detalhes de modelagem que rendem pergunta
+
+**`NotaRedacao` é uma propriedade calculada, não uma coluna** — em vez de gravar a nota total e
+correr o risco dela ficar dessincronizada da soma das 5 competências, `TentativaProva.NotaRedacao`
+é um `get` que soma `NotaComp1` a `NotaComp5` só quando as 5 estão preenchidas:
+
+```csharp
+public int? NotaRedacao =>
+    NotaComp1.HasValue && NotaComp2.HasValue && NotaComp3.HasValue && NotaComp4.HasValue && NotaComp5.HasValue
+        ? NotaComp1 + NotaComp2 + NotaComp3 + NotaComp4 + NotaComp5
+        : null;
+```
+
+`entity.Ignore(e => e.NotaRedacao)` no `DbContext` — mesma ideia do `Assuntos` abaixo: essa
+propriedade não vira coluna, é só uma visão calculada das outras.
 
 **`AssuntosJson` + a propriedade `Assuntos`** — SQLite não tem tipo array. A solução foi
 guardar a lista de assuntos como texto JSON na coluna `AssuntosJson` e expor uma propriedade
@@ -360,18 +387,19 @@ que é o que permite filtrar o acervo por área com segurança.
 | `Usuario.cs` | Pessoa que usa o sistema. `Tipo` define o papel. |
 | `Questao.cs` | Uma questão: enunciado (`Titulo`), área do ENEM, assuntos, imagem opcional, ano e fonte. |
 | `Alternativa.cs` | Uma opção de resposta, com o booleano `Correta`. |
-| `Prova.cs` | Um simulado: título, turma (opcional), tempo limite e tema de redação opcional. |
+| `Prova.cs` | Um simulado: título, turma (opcional — nula = aberta), tempo limite e tema de redação opcional. |
 | `TemaRedacao.cs` | Título + texto motivador (+ ano/fonte, para citar temas oficiais). |
 | `TentativaProva.cs` | O registro de um aluno fazendo uma prova. É a entidade central do produto. |
 | `RespostaAluno.cs` | Uma resposta dentro de uma tentativa. |
 | `AreaConhecimento.cs` | As 4 áreas do ENEM + validação. |
+| `Turma.cs` | Um grupo de alunos — o professor matricula alunos nela e pode atribuir provas a ela. |
 
 **`Data/`**
 
 | Arquivo | Função |
 |---|---|
 | `BancoQuestoesContext.cs` | Configura todo o mapeamento objeto-relacional: chaves, tamanhos, índices, relacionamentos e comportamento de exclusão. Também força `DateTimeKind.Utc` na leitura (ver §9). |
-| `DbSeeder.cs` | Popula o banco na primeira execução: usuários de teste, acervo do ENEM (lido do JSON) e prova de exemplo. Cada etapa checa antes se já existe, então é seguro rodar sempre. |
+| `DbSeeder.cs` | Popula o banco na primeira execução: usuários de teste, uma turma de exemplo (com o aluno de teste matriculado), acervo do ENEM (lido do JSON) e prova de exemplo. Cada etapa checa antes se já existe, então é seguro rodar sempre. |
 | `Seed/questoes_enem.json` | O acervo: 539 questões + 1 tema de redação, em JSON. **Adicionar conteúdo aqui não exige mexer em código.** |
 | `Seed/Imagens/` | As 142 imagens de questões do acervo, versionadas no repositório. |
 
@@ -381,10 +409,11 @@ que é o que permite filtrar o acervo por área com segurança.
 |---|---|---|
 | `AuthController.cs` | `api/auth` | Pública (registrar e login) |
 | `QuestoesController.cs` | `api/questoes` | Leitura pública; escrita e upload só Professor |
-| `ProvasController.cs` | `api/Provas` | Leitura pública; escrita só Professor |
+| `ProvasController.cs` | `api/Provas` | Leitura pública (mas filtrada por turma se quem chama for Aluno); escrita só Professor |
 | `TemasRedacaoController.cs` | `api/temas-redacao` | Leitura pública; escrita só Professor |
 | `TentativasController.cs` | `api/tentativas` | Controller inteiro **só Aluno** |
 | `RedacoesController.cs` | `api/redacoes` | Controller inteiro **só Professor** |
+| `TurmasController.cs` | `api/turmas` | Controller inteiro **só Professor** |
 
 **`Security/`**
 
@@ -419,12 +448,14 @@ que é o que permite filtrar o acervo por área com segurança.
 |---|---|
 | `Questoes.html` / `Questoes.js` | Lista o banco de questões em cards paginados (20 por página), com badge de área, imagem e ações de editar/excluir. |
 | `Questao.html` / `Questao.js` | Formulário de cadastro/edição. Mesma tela para os dois casos: se a URL tem `?id=`, carrega e faz `PUT`; se não, faz `POST`. Também faz o upload da imagem. |
-| `Provas.html` / `Provas.js` | Lista as provas montadas. |
-| `Prova.html` / `Prova.js` | Composição da prova: busca questões no banco por palavra do enunciado e/ou área do ENEM (paginado), adiciona/remove da seleção com confirmação visual (toast + botão "✓ Adicionada"), define turma, tempo limite e tema de redação. |
+| `Provas.html` / `Provas.js` | Lista as provas montadas, com a turma de cada uma (quando houver). |
+| `Prova.html` / `Prova.js` | Composição da prova: sorteia N questões por área de uma vez, ou busca questões no banco por palavra do enunciado e/ou área do ENEM (paginado), adiciona/remove da seleção com confirmação visual (toast + botão "✓ Adicionada"), define turma (opcional), tempo limite e tema de redação. |
+| `Turmas.html` / `Turmas.js` | Lista as turmas com a quantidade de alunos; cria uma turma nova. |
+| `Turma.html` / `Turma.js` | Renomeia a turma, matricula um aluno (escolhido de todos os cadastrados) e remove alunos matriculados. |
 | `TemasRedacao.html` / `TemasRedacao.js` | Lista os temas. |
 | `TemaRedacao.html` / `TemaRedacao.js` | Cadastro/edição de tema com texto motivador. |
 | `Redacoes.html` / `Redacoes.js` | Lista as redações entregues, marcando pendente ou corrigida. |
-| `CorrigirRedacao.html` / `CorrigirRedacao.js` | Mostra tema + texto do aluno e recebe nota (0–1000) e comentário. |
+| `CorrigirRedacao.html` / `CorrigirRedacao.js` | Mostra tema + texto do aluno e recebe as 5 competências do ENEM (0–200 cada) e um comentário — soma total calculada em tempo real na tela. |
 
 **Telas do Aluno**
 
@@ -520,7 +551,7 @@ questão entra na seleção, aparece um toast de confirmação e o botão daquel
 ```json
 {
   "titulo": "Simulado 1",
-  "turma": "101",
+  "turmaId": 1,
   "tempoLimiteMinutos": 180,
   "temaRedacaoId": 1,
   "QuestoesIds": [12, 47, 103]
@@ -530,6 +561,7 @@ questão entra na seleção, aparece um toast de confirmação e o botão daquel
 O `ProvasController` valida no servidor:
 - Todos os IDs de questão existem? (senão, retorna quais faltaram)
 - O tema de redação informado existe?
+- A turma informada existe? (`turmaId` é opcional — nulo deixa a prova aberta)
 - `TempoLimiteMinutos` está entre 1 e 600? (atributo `[Range]` no Request)
 
 Só então cria a prova, e o EF grava as linhas da tabela de junção sozinho.
@@ -661,9 +693,12 @@ divisão correta, e mostra que o sistema modela o processo real de um cursinho.
 não duplica nada.
 
 - `SeedUsuarios` — cria os dois usuários de teste se a tabela estiver vazia.
+- `SeedTurmas` — cria uma turma de exemplo ("Turma 101 — Tarde") e matricula o aluno de teste
+  nela, pra já dar pra testar a visibilidade por turma sem montar nada manualmente.
 - `SeedEnem` — lê `Data/Seed/questoes_enem.json` e insere temas e questões.
 - `SeedProvaExemplo` — monta uma prova com **uma questão de cada área** (agrupa por `Area` e
-  pega a primeira de cada grupo), 60 minutos, com o tema de redação associado.
+  pega a primeira de cada grupo), 60 minutos, com o tema de redação associado. Fica sem turma
+  (aberta), então qualquer aluno consegue fazê-la.
 
 O acervo tem 539 questões: 4 curadas manualmente (ENEM 2014–2016, com fonte citada) e 535
 importadas das provas de 2022, 2023 e 2024 — 180 por ano, menos as anuladas oficialmente pelo
@@ -671,6 +706,25 @@ INEP e duas com dado corrompido na fonte. As 142 imagens ficam em `Data/Seed/Ima
 
 **Extensibilidade:** acrescentar questões é editar o JSON, sem tocar em uma linha de C#. Esse é
 um argumento de projeto que vale mencionar na apresentação.
+
+### 8.9 Turmas: quem vê o quê
+
+`Usuario.TurmaId` e `Prova.TurmaId` são independentes um do outro — matricular um aluno numa
+turma não muda nada nas provas já criadas, e vice-versa. A ligação entre os dois só importa na
+hora de decidir **quais provas um aluno enxerga**, e isso acontece em dois pontos:
+
+1. **`GET /api/Provas` filtra por papel.** Se quem chama é Professor (ou a chamada não tem
+   token), devolve todas as provas — é a visão de gerenciamento. Se é Aluno, o controller busca
+   o `TurmaId` desse aluno no banco e filtra: só provas com `TurmaId == null` (abertas) ou
+   `TurmaId` igual ao da turma do aluno.
+2. **`POST /api/tentativas/iniciar` confere de novo, no servidor.** Mesmo que um aluno descubra
+   o ID de uma prova de outra turma (ex.: adivinhando a URL), o `Iniciar` recusa com `403
+   Forbidden` se `prova.TurmaId` não bater com a turma do aluno. O item 1 é conveniência de
+   navegação; este é a segurança de verdade — o mesmo princípio já usado no resto do sistema
+   (ver §11).
+
+Trocar ou remover a turma de um aluno é imediato: não existe cache nem cópia da informação em
+outro lugar, a próxima chamada a qualquer um dos dois endpoints já reflete a mudança.
 
 ---
 
@@ -786,6 +840,20 @@ espaço.
 Resultado: `.container`/`.navbar` cresceram de 800/900px pra 1400px por padrão, mas cada tela
 usa essa largura do jeito que faz sentido pro seu próprio conteúdo.
 
+### 9.9 Sortear "aleatório" sem o EF reclamar
+
+O sorteio de questões por área (`QuestoesController.Sortear`) precisa embaralhar uma lista e
+pegar os N primeiros. A armadilha: fazer isso dentro de uma expressão LINQ que ainda vai virar
+SQL — algo como `_context.Questoes.OrderBy(q => Guid.NewGuid())` — não funciona, porque o EF
+Core tenta traduzir `Guid.NewGuid()` para SQL e não consegue (ou, em versões mais antigas,
+caía silenciosamente pra avaliação client-side, o que o EF Core 3+ proíbe por padrão).
+
+A solução foi separar em duas etapas: primeiro busca só os IDs da área **do banco**
+(`.Select(q => q.IdQuestao).ToListAsync()` — isso vira SQL de verdade), e só depois, já como
+uma `List<int>` em memória (LINQ-to-Objects, não mais LINQ-to-Entities), embaralha com
+`OrderBy(_ => rng.Next())` e corta com `.Take(porArea)`. Regrinha geral: se a operação não tem
+tradução natural pra SQL, ela precisa acontecer depois do `ToListAsync()`, não antes.
+
 ---
 
 ## 10. Testes automatizados
@@ -820,6 +888,7 @@ Resumo para citar de forma organizada:
 | Usuário sem permissão executando ação de outro papel | `[Authorize(Roles = ...)]` validado no servidor |
 | Aluno vendo o gabarito durante a prova | Responses específicas sem o campo `Correta` |
 | Aluno lendo a tentativa de outro aluno | Verificação `tentativa.AlunoId != alunoId` → 403 |
+| Aluno iniciando prova de uma turma que não é a dele | Verificação `prova.TurmaId != turmaDoAluno` em `TentativasController.Iniciar` → 403 (a lista já filtra, mas isso é a checagem real) |
 | Aluno burlando o cronômetro | Prazo calculado e verificado no servidor (`ExpiraEm` vs `DateTime.UtcNow`) |
 | Upload malicioso | Extensão restrita a 4 formatos, limite de 5 MB, nome gerado por GUID no servidor |
 | Token adulterado ou expirado | Assinatura HMAC-SHA256 validada, mais emissor, público e validade |

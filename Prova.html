@@ -15,52 +15,54 @@
   <div class="container">
     <div class="card">
       <div class="card-body">
-        <h4 class="card-title">Corpo de Prova</h4>
+        <div class="form-compacto">
+          <h4 class="card-title">Corpo de Prova</h4>
 
-        <div class="form-group">
-          <label for="cabecalho">Título</label>
-          <input type="text" id="titulo" placeholder="Digite a materia da prova">
-        </div>
-
-        <div class="form-group">
-          <label for="turma">Número da Turma</label>
-          <input type="text" id="turma" placeholder="Ex: 101">
-        </div>
-
-        <div class="row">
           <div class="form-group">
-            <label for="tempoLimite">Tempo limite (minutos)</label>
-            <input type="number" id="tempoLimite" value="180" min="1" max="600">
+            <label for="cabecalho">Título</label>
+            <input type="text" id="titulo" placeholder="Digite a materia da prova">
           </div>
 
           <div class="form-group">
-            <label for="temaRedacao">Tema de redação (opcional)</label>
-            <select id="temaRedacao">
-              <option value="">Nenhum</option>
-            </select>
+            <label for="turma">Número da Turma</label>
+            <input type="text" id="turma" placeholder="Ex: 101">
           </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label for="tempoLimite">Tempo limite (minutos)</label>
+              <input type="number" id="tempoLimite" value="180" min="1" max="600">
+            </div>
+
+            <div class="form-group">
+              <label for="temaRedacao">Tema de redação (opcional)</label>
+              <select id="temaRedacao">
+                <option value="">Nenhum</option>
+              </select>
+            </div>
+          </div>
+
+          <h5>Banco de Questões</h5>
+
+          <div class="row">
+            <div class="form-group">
+              <label>Buscar por palavra no enunciado:</label>
+              <input type="text" id="filtroBusca" placeholder="Ex: racismo">
+            </div>
+
+            <div class="form-group">
+              <label>Área de conhecimento (ENEM):</label>
+              <select id="filtroArea">
+                <option value="">Todas as áreas</option>
+                <option value="Linguagens, Códigos e suas Tecnologias">Linguagens, Códigos</option>
+                <option value="Ciências Humanas e suas Tecnologias">Ciências Humanas</option>
+                <option value="Ciências da Natureza e suas Tecnologias">Ciências da Natureza</option>
+                <option value="Matemática e suas Tecnologias">Matemática</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" onclick="buscarQuestoes()" class="btn">Filtrar</button>
         </div>
-
-        <h5>Banco de Questões</h5>
-
-        <div class="row">
-          <div class="form-group">
-            <label>Buscar por palavra no enunciado:</label>
-            <input type="text" id="filtroBusca" placeholder="Ex: racismo">
-          </div>
-
-          <div class="form-group">
-            <label>Área de conhecimento (ENEM):</label>
-            <select id="filtroArea">
-              <option value="">Todas as áreas</option>
-              <option value="Linguagens, Códigos e suas Tecnologias">Linguagens, Códigos</option>
-              <option value="Ciências Humanas e suas Tecnologias">Ciências Humanas</option>
-              <option value="Ciências da Natureza e suas Tecnologias">Ciências da Natureza</option>
-              <option value="Matemática e suas Tecnologias">Matemática</option>
-            </select>
-          </div>
-        </div>
-        <button type="button" onclick="buscarQuestoes()" class="btn">Filtrar</button>
 
         <h5 class="titulo-tabela">Questões Disponíveis</h5>
         <table class="tabela-questoes" id="tabelaQuestoes">

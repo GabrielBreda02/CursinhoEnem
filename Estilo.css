@@ -43,7 +43,7 @@ body {
    Barra de navegação
 ================================= */
 .navbar {
-    max-width: 900px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 14px 24px;
     display: flex;
@@ -105,13 +105,26 @@ body {
 
 /* Containers Gerais */
 .container {
-    max-width: 800px;
+    max-width: 1400px;
     margin: 16px auto 48px auto;
     background-color: var(--surface);
     padding: 36px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     text-align: center;
+}
+
+/* Páginas de formulário puro (login, cadastro, criar questão/tema, fazer prova...) não têm
+   grade de cards pra aproveitar a largura extra — um input de uma linha só esticado até
+   1400px fica com cara de formulário quebrado. Essas páginas pedem essa largura menor de volta. */
+.container-estreito {
+    max-width: 800px;
+}
+
+/* Bloco de campos dentro de uma página larga (ex.: Prova.html), quando só uma PARTE do
+   conteúdo é formulário e o resto (a grade de questões) deve usar a largura toda. */
+.form-compacto {
+    max-width: 760px;
 }
 
 /* Títulos */
@@ -625,7 +638,6 @@ input[type="radio"] {
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
     padding: 18px 20px;
-    margin-top: 12px;
     background-color: var(--surface);
     text-align: left;
     transition: box-shadow 0.15s ease, border-color 0.15s ease;
@@ -650,13 +662,15 @@ li {
     margin-bottom: 4px;
 }
 
-/* Lista genérica usada em várias telas de listagem */
+/* Lista genérica usada em várias telas de listagem — grade responsiva: quantas
+   colunas couberem no espaço disponível, em vez de empilhar tudo numa coluna só. */
 .lista {
     margin-top: 20px;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 16px;
     text-align: left;
+    align-items: start;
 }
 
 .acoes {
@@ -671,11 +685,14 @@ li {
 ================================= */
 .tabela-questoes {
     width: 100%;
-    border-collapse: collapse;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+    align-items: start;
     background-color: var(--surface);
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
-    overflow: hidden;
+    padding: 16px;
     margin-top: 16px;
 }
 

@@ -80,8 +80,9 @@ de redação e 1 prova de exemplo montada (1 questão de cada área).
 6. **Repaginação visual completa** — design system em `Estilo.css` (paleta índigo/âmbar,
    tipografia Inter), navbar consistente em todas as páginas (`auth.js: renderNavbar()`), menu
    principal em cards, favicon
-7. **Suíte de testes automatizados corrigida** — `BancoQuestoes.Tests` compila e os 16 testes
-   passam (`dotnet test BancoQuestoes.Tests.csproj`, ver observações técnicas abaixo)
+7. **Suíte de testes automatizados corrigida** — `BancoQuestoes.Tests` compila e os testes
+   passam (`dotnet test BancoQuestoes.Tests.csproj`, ver observações técnicas abaixo; contagem
+   atual em 45, ver item 17)
 8. **Correção de redação pelo professor** — `TentativaProva.NotaRedacao`/`ComentarioRedacao`,
    `RedacoesController` (`api/redacoes`, `[Authorize(Roles = "Professor")]`), telas
    `Redacoes.html` (lista) e `CorrigirRedacao.html` (nota 0-1000 + comentário); o aluno vê a
@@ -133,6 +134,16 @@ de redação e 1 prova de exemplo montada (1 questão de cada área).
     os IDs de cada uma das 4 áreas, embaralha em memória (não dá pra embaralhar via SQL/EF sem
     cair em avaliação client-side) e devolve N de cada. `Prova.html` soma o resultado à seleção
     atual com um toast de confirmação
+17. **Testes automatizados de Turmas, sorteio e correção por competências** — 28 testes novos
+    em 3 classes (`TurmasIntegrationTests`, `TentativasIntegrationTests`,
+    `RedacoesIntegrationTests`), mais 4 em `QuestoesIntegrationTests` pro sorteio. Suíte total
+    sobe de 17 pra 45. `IntegrationTestBase` ganhou um segundo `HttpClient` autenticado como
+    Aluno (`_alunoClient` + `AlunoId`), necessário pra testar fluxos que só o papel Aluno faz
+    (iniciar/finalizar prova, ler o próprio resultado). Escrever o teste de exclusão de turma
+    pegou um bug real: `TurmasController.DeleteTurma` não tinha `.Include(Alunos)/.Include(Provas)`
+    antes de remover, então o `SetNull` não zerava `TurmaId` em memória — funcionava por acaso
+    no SQLite real (a constraint do banco cobria) mas não no provedor InMemory dos testes.
+    Corrigido com os dois `.Include()`
 
 Todas as fases foram testadas por `curl`/script Python e pelo navegador (fluxo completo dos
 dois papéis) antes de cada commit.
@@ -194,10 +205,6 @@ dois papéis) antes de cada commit.
   questões 2022-2024 tinha 2 imagens na fonte (ex.: dois gráficos complementares); só a primeira
   foi importada. Não travou nenhuma questão, mas quem for revisar o acervo pode achar um caso ou
   outro em que falta contexto visual.
-- **Turmas, sorteio de questões e correção por competências (itens 14-16) não têm testes
-  automatizados ainda** — os 17 `[Fact]` existentes cobrem só Questões e Provas. As três telas
-  novas foram testadas manualmente (fluxo completo com o navegador) antes de cada commit, mas
-  não têm cobertura de regressão no `BancoQuestoes.Tests`.
 - **`Usuario.TurmaId` é uma FK simples** — um aluno só pode estar em uma turma por vez. Suficiente
   pro caso de uso atual, mas não modela aluno em duas turmas ao mesmo tempo (viraria N:N).
 - Nenhuma dessas pendências bloqueia o uso do sistema — são possíveis evoluções futuras.

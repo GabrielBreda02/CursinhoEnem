@@ -72,7 +72,7 @@ Essa é a lista que vale decorar — cada item tem uma seção detalhada mais ad
    com questões reais citando ano e fonte.
 6. **Repaginação visual** — design system em `Estilo.css`, navbar consistente, menu em cards,
    favicon.
-7. **Suíte de testes corrigida** — 17 testes de integração compilando e passando.
+7. **Suíte de testes corrigida** — 45 testes de integração compilando e passando.
 8. **Correção de redação pelo professor** — `RedacoesController` + telas de lista e de
    correção pelas 5 competências do ENEM (0–200 cada, mais comentário), visível ao aluno no
    resultado.
@@ -422,7 +422,7 @@ que é o que permite filtrar o acervo por área com segurança.
 | `JwtTokenService.cs` | Gera o token assinado com as claims `sub` (id), `email`, `name`, `jti` e **`role`** (o tipo do usuário). |
 | `PasswordHasher.cs` | `Hash()` e `Verificar()` com PBKDF2-SHA256, salt aleatório de 16 bytes e 100.000 iterações. |
 
-**`Tests/`** — 17 testes de integração (detalhes em §10).
+**`Tests/`** — 45 testes de integração (detalhes em §10).
 
 ### Front-end · raiz do repositório
 
@@ -858,22 +858,45 @@ tradução natural pra SQL, ela precisa acontecer depois do `ToListAsync()`, nã
 
 ## 10. Testes automatizados
 
-**17 testes de integração** em xUnit — 9 para questões e 8 para provas.
+**45 testes de integração** em xUnit, em 5 classes — uma por controller coberto:
+
+| Classe | Testes | Cobre |
+|---|---|---|
+| `QuestoesIntegrationTests` | 13 | CRUD, busca por palavra, paginação, sorteio por área |
+| `ProvasIntegrationTests` | 8 | CRUD, quantidade de questões, turma |
+| `TurmasIntegrationTests` | 11 | CRUD, matrícula/transferência/remoção de aluno, `SetNull` ao excluir |
+| `TentativasIntegrationTests` | 5 | Restrição de prova por turma (`Iniciar` e listagem) |
+| `RedacoesIntegrationTests` | 8 | Correção pelas 5 competências, validação de múltiplos de 20 |
 
 Não são testes unitários com mocks: o `WebApplicationFactory<Program>` **sobe a aplicação
 inteira** e os testes conversam com ela por HTTP real, com o banco trocado por um provedor
 **InMemory** com nome único por classe de teste (`Guid.NewGuid()`), garantindo isolamento.
 
-`IntegrationTestBase` resolve dois detalhes:
+`IntegrationTestBase` resolve três detalhes:
 
 - **Login antes dos testes** — como os endpoints de escrita exigem papel Professor, a base
   registra um professor e faz login no `InitializeAsync()`, guardando o token no header padrão
-  do `HttpClient`. (Vai em `IAsyncLifetime` porque xUnit não aceita construtor assíncrono.)
+  do `HttpClient` (`_client`). (Vai em `IAsyncLifetime` porque xUnit não aceita construtor
+  assíncrono.)
+- **Um segundo cliente autenticado como Aluno** (`_alunoClient` + `AlunoId`) — registrado e
+  logado do mesmo jeito, num `HttpClient` separado. Existe porque testar turma e redação exige
+  fazer coisas que só o papel Aluno pode fazer (iniciar/finalizar prova, ler o próprio
+  resultado) enquanto o `_client` continua logado como Professor pra montar o cenário.
 - **Limpeza** — `Dispose()` apaga o banco em memória ao fim.
 
 O que os testes cobrem: listar vazio, criar com dados válidos, rejeitar questão sem alternativa
 correta, rejeitar dados inválidos, buscar por ID inexistente, buscar por palavra no enunciado,
-paginar, atualizar, excluir, e prova com questão inexistente.
+paginar, atualizar, excluir, prova com questão inexistente, matricular/transferir/remover aluno
+de turma, aluno só ver e só conseguir iniciar prova aberta ou da própria turma, sorteio
+respeitando a área e sem duplicar, e correção de redação calculando a nota certa a partir das
+5 competências.
+
+Escrever os testes de Turmas pegou um bug de verdade: `DeleteTurma` não carregava `Alunos`/
+`Provas` antes de remover a turma, então o `SetNull` configurado no `DbContext` não tinha o que
+zerar em memória — via SQLite real (que aplica a constraint de chave estrangeira no próprio
+banco) isso não aparecia, mas no provedor InMemory dos testes, sim. Corrigido dando `.Include()`
+nas duas coleções antes do `Remove()` — mais uma prova de que teste de integração encontra
+problema que não seria visto lendo o código.
 
 ---
 

@@ -18,6 +18,7 @@
 | Turmas | Professor agrupa alunos em turmas e atribui provas a uma turma específica — aluno só vê (e só consegue iniciar) provas da própria turma ou provas abertas |
 | Correção de redação | Nota única trocada pelas 5 competências do ENEM (0-200 cada), como na correção oficial |
 | Composição de prova | Sorteio automático de questões por área, pra montar uma prova balanceada em um clique |
+| Testes automatizados | 28 testes novos cobrindo Turmas, sorteio e correção por competências — suíte total de 17 para 45; um deles encontrou um bug real na exclusão de turma |
 
 ---
 
@@ -158,7 +159,26 @@ quantidade de questões aleatórias de **cada** uma das 4 áreas e já adiciona 
 uma vez, com uma única confirmação ("180 questões sorteadas e adicionadas"). O professor ainda
 pode remover ou adicionar questões manualmente depois — o sorteio só dá o ponto de partida.
 
-## 11. Problemas técnicos enfrentados no caminho (fora do código em si)
+## 11. Testes automatizados das três funcionalidades novas
+
+**Problema:** Turmas, sorteio e correção por competências foram testadas manualmente pelo
+navegador antes de cada commit, mas não tinham nenhum teste automatizado cobrindo regressão —
+ou seja, uma mudança futura poderia quebrar qualquer uma delas sem ninguém perceber até testar
+na mão de novo.
+
+**O que foi feito:** 28 testes de integração novos, em xUnit, cobrindo as três funcionalidades
+(CRUD de turma, matrícula/transferência/remoção de aluno, aluno só ver e só conseguir iniciar
+prova aberta ou da própria turma, sorteio respeitando a área e sem duplicar, correção de redação
+calculando a nota certa a partir das 5 competências). A suíte foi de 17 para 45 testes.
+
+Escrever o teste de "excluir turma" **encontrou um bug de verdade**: o código que remove uma
+turma não carregava os alunos e provas dela antes de apagar, então a regra que deveria zerar a
+turma desses alunos/provas (em vez de excluí-los) não tinha o que zerar em memória durante o
+teste. No banco real (SQLite) isso não aparecia, porque o próprio banco garante essa regra —
+mas era uma garantia por sorte do provedor de banco, não do código. Corrigido carregando essas
+listas antes de remover.
+
+## 12. Problemas técnicos enfrentados no caminho (fora do código em si)
 
 Dois problemas de ambiente, não de código, valem registrar porque tomaram tempo de diagnóstico:
 

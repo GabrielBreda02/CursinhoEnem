@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciar Turma</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="Estilo.css">
+</head>
+
+<body>
+  <div id="navbar"></div>
+
+  <div class="container container-estreito">
+    <h1 class="titulo">Gerenciar Turma</h1>
+
+    <div class="campo">
+      <label>Nome da turma</label>
+      <input type="text" id="nomeTurma">
+    </div>
+    <div class="acoes" style="justify-content:flex-start;">
+      <button type="button" onclick="salvarNome()" class="btn">Salvar Nome</button>
+      <button type="button" onclick="window.location.href='Turmas.html'" class="btn btn-ghost">Voltar</button>
+    </div>
+
+    <h5 class="titulo-tabela" style="margin-top:24px;">Matricular aluno</h5>
+    <div class="row">
+      <div class="form-group">
+        <select id="selecionarAluno"></select>
+      </div>
+      <div class="form-group" style="justify-content:flex-end;display:flex;">
+        <button type="button" onclick="matricularAluno()" class="btn">Matricular</button>
+      </div>
+    </div>
+
+    <h5 class="titulo-tabela">Alunos matriculados</h5>
+    <div id="listaAlunos" class="lista"></div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="Turma.js"></script>
+</body>
+
+</html>

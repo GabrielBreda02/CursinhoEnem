@@ -5,6 +5,7 @@ const tituloInput = document.getElementById("titulo");
 const turmaInput = document.getElementById("turma");
 const tempoLimiteInput = document.getElementById("tempoLimite");
 const temaRedacaoSelect = document.getElementById("temaRedacao");
+const qtdSorteioInput = document.getElementById("qtdSorteio");
 const filtroBuscaInput = document.getElementById("filtroBusca");
 const filtroAreaInput = document.getElementById("filtroArea");
 const listaBanco = document.getElementById("tabelaQuestoes");
@@ -25,13 +26,24 @@ fetch(`${API_BASE}/temas-redacao`)
             option.textContent = tema.titulo;
             temaRedacaoSelect.appendChild(option);
         });
+    });
+
+authFetch(`${API_BASE}/turmas`)
+    .then(res => res.json())
+    .then(turmas => {
+        turmas.forEach(turma => {
+            const option = document.createElement("option");
+            option.value = turma.idTurma;
+            option.textContent = turma.nome;
+            turmaInput.appendChild(option);
+        });
 
         if (id) {
             fetch(`${API_BASE}/Provas/${id}`)
                 .then(res => res.json())
                 .then(prova => {
                     tituloInput.value = prova.titulo;
-                    turmaInput.value = prova.turma || "";
+                    turmaInput.value = prova.turmaId || "";
                     tempoLimiteInput.value = prova.tempoLimiteMinutos;
                     temaRedacaoSelect.value = prova.temaRedacaoId || "";
                     questoesSelecionadas = prova.questoes.map(q => q.idQuestao);
@@ -101,6 +113,35 @@ function adicionarQuestao(idQuestao, botao) {
     mostrarToast("Questão adicionada à prova.");
 }
 
+function sortearQuestoes() {
+    const porArea = Number(qtdSorteioInput.value);
+
+    if (!porArea || porArea < 1) {
+        alert("Informe quantas questões sortear por área.");
+        return;
+    }
+
+    authFetch(`${API_BASE}/questoes/sortear?porArea=${porArea}`)
+        .then(async response => {
+            const dados = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(dados.message || "Não foi possível sortear as questões.");
+            }
+            return dados;
+        })
+        .then(idsSorteados => {
+            const novas = idsSorteados.filter(idQuestao => !questoesSelecionadas.includes(idQuestao));
+            questoesSelecionadas.push(...novas);
+            carregarQuestoesSelecionadas();
+            buscarQuestoes(paginaAtualQuestoes);
+            mostrarToast(`${novas.length} questões sorteadas e adicionadas à prova.`);
+        })
+        .catch(erro => {
+            console.error(erro);
+            alert(erro.message);
+        });
+}
+
 function mostrarToast(mensagem) {
     const existente = document.querySelector(".toast");
     if (existente) {
@@ -144,7 +185,7 @@ function carregarQuestoesSelecionadas() {
 function salvarProva() {
     const dados = {
         titulo: tituloInput.value.trim(),
-        turma: turmaInput.value.trim() || null,
+        turmaId: turmaInput.value ? Number(turmaInput.value) : null,
         tempoLimiteMinutos: Number(tempoLimiteInput.value) || 180,
         temaRedacaoId: temaRedacaoSelect.value ? Number(temaRedacaoSelect.value) : null,
         QuestoesIds: questoesSelecionadas

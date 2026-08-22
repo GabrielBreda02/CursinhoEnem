@@ -13,7 +13,16 @@ const secaoRedacaoResultado = document.getElementById("secaoRedacaoResultado");
 const temaRedacaoResultado = document.getElementById("temaRedacaoResultado");
 const textoRedacaoResultado = document.getElementById("textoRedacaoResultado");
 const notaRedacaoResultado = document.getElementById("notaRedacaoResultado");
+const competenciasResultado = document.getElementById("competenciasResultado");
 const comentarioRedacaoResultado = document.getElementById("comentarioRedacaoResultado");
+
+const NOMES_COMPETENCIAS = [
+    "C1 — Domínio da norma culta",
+    "C2 — Compreensão do tema",
+    "C3 — Argumentação",
+    "C4 — Coesão textual",
+    "C5 — Proposta de intervenção"
+];
 
 if (!tentativaId) {
     tituloProva.textContent = "Resultado não encontrado.";
@@ -79,6 +88,12 @@ function renderizarResultado(dados) {
         if (dados.notaRedacao != null) {
             notaRedacaoResultado.textContent = `Nota da redação: ${dados.notaRedacao} / 1000`;
             notaRedacaoResultado.className = "status-correta";
+
+            const notas = [dados.notaComp1, dados.notaComp2, dados.notaComp3, dados.notaComp4, dados.notaComp5];
+            competenciasResultado.innerHTML = NOMES_COMPETENCIAS
+                .map((nome, i) => `<p>${nome}: <strong>${notas[i]} / 200</strong></p>`)
+                .join("");
+            competenciasResultado.style.display = "block";
         } else {
             notaRedacaoResultado.textContent = "Aguardando correção do professor";
             notaRedacaoResultado.className = "";

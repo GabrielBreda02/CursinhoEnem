@@ -17,8 +17,8 @@ fetch(`${API_BASE}/Provas`)
             const temaHtml = prova.temaRedacaoTitulo
                 ? `<p><strong>Tema de redação:</strong> ${prova.temaRedacaoTitulo}</p>`
                 : "";
-            const turmaHtml = prova.turma
-                ? `<p><strong>Turma:</strong> ${prova.turma}</p>`
+            const turmaHtml = prova.turmaNome
+                ? `<p><strong>Turma:</strong> ${prova.turmaNome}</p>`
                 : "";
 
             card.innerHTML = `

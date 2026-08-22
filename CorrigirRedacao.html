@@ -23,12 +23,32 @@
         <p id="textoRedacao" style="white-space:pre-wrap;background:var(--bg);padding:16px;border-radius:var(--radius-sm);"></p>
 
         <form id="formCorrecao" style="margin-top:24px;">
+            <p class="titulo-tabela">Competências (0 a 200 cada, em múltiplos de 20 — como no ENEM)</p>
             <div class="row">
                 <div class="campo">
-                    <label>Nota (0 a 1000)</label>
-                    <input type="number" id="notaRedacao" min="0" max="1000" placeholder="Ex.: 800">
+                    <label>C1 — Domínio da norma culta</label>
+                    <input type="number" id="notaComp1" min="0" max="200" step="20" placeholder="Ex.: 160">
+                </div>
+                <div class="campo">
+                    <label>C2 — Compreensão do tema</label>
+                    <input type="number" id="notaComp2" min="0" max="200" step="20" placeholder="Ex.: 160">
                 </div>
             </div>
+            <div class="row">
+                <div class="campo">
+                    <label>C3 — Argumentação</label>
+                    <input type="number" id="notaComp3" min="0" max="200" step="20" placeholder="Ex.: 160">
+                </div>
+                <div class="campo">
+                    <label>C4 — Coesão textual</label>
+                    <input type="number" id="notaComp4" min="0" max="200" step="20" placeholder="Ex.: 160">
+                </div>
+            </div>
+            <div class="campo">
+                <label>C5 — Proposta de intervenção</label>
+                <input type="number" id="notaComp5" min="0" max="200" step="20" placeholder="Ex.: 160">
+            </div>
+            <p id="notaTotalPreview" style="font-weight:700;margin-top:4px;"></p>
             <div class="campo">
                 <label>Comentário para o aluno</label>
                 <textarea id="comentarioRedacao" placeholder="Feedback sobre a redação..." style="min-height:150px;"></textarea>

@@ -4,7 +4,7 @@
 
 const container = document.getElementById("listaProvas");
 
-fetch(`${API_BASE}/Provas`)
+authFetch(`${API_BASE}/Provas`)
     .then(response => response.json())
     .then(provas => {
         container.innerHTML = "";
@@ -21,8 +21,8 @@ fetch(`${API_BASE}/Provas`)
             const temaHtml = prova.temaRedacaoTitulo
                 ? `<p><strong>Redação:</strong> ${prova.temaRedacaoTitulo}</p>`
                 : "";
-            const turmaHtml = prova.turma
-                ? `<p><strong>Turma:</strong> ${prova.turma}</p>`
+            const turmaHtml = prova.turmaNome
+                ? `<p><strong>Turma:</strong> ${prova.turmaNome}</p>`
                 : "";
 
             card.innerHTML = `

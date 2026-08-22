@@ -91,6 +91,11 @@ public class RedacoesController : ControllerBase
             TemaRedacaoTitulo = tentativa.Prova.TemaRedacao.Titulo,
             TemaRedacaoTexto = tentativa.Prova.TemaRedacao.TextoMotivador,
             TextoRedacao = tentativa.TextoRedacao,
+            NotaComp1 = tentativa.NotaComp1,
+            NotaComp2 = tentativa.NotaComp2,
+            NotaComp3 = tentativa.NotaComp3,
+            NotaComp4 = tentativa.NotaComp4,
+            NotaComp5 = tentativa.NotaComp5,
             NotaRedacao = tentativa.NotaRedacao,
             ComentarioRedacao = tentativa.ComentarioRedacao
         });
@@ -129,7 +134,17 @@ public class RedacoesController : ControllerBase
             return BadRequest(new ApiResponse { Message = "Essa prova não tem redação associada", Success = false });
         }
 
-        tentativa.NotaRedacao = request.NotaRedacao;
+        var notas = new[] { request.NotaComp1, request.NotaComp2, request.NotaComp3, request.NotaComp4, request.NotaComp5 };
+        if (notas.Any(n => n % 20 != 0))
+        {
+            return BadRequest(new ApiResponse { Message = "Cada competência é avaliada em múltiplos de 20 (0, 20, 40 ... 200), como no ENEM", Success = false });
+        }
+
+        tentativa.NotaComp1 = request.NotaComp1;
+        tentativa.NotaComp2 = request.NotaComp2;
+        tentativa.NotaComp3 = request.NotaComp3;
+        tentativa.NotaComp4 = request.NotaComp4;
+        tentativa.NotaComp5 = request.NotaComp5;
         tentativa.ComentarioRedacao = request.ComentarioRedacao;
 
         await _context.SaveChangesAsync();

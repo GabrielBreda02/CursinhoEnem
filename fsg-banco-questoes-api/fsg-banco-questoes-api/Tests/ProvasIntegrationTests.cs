@@ -102,10 +102,13 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questaoResponse = await _client.PostAsJsonAsync("/api/questoes", questaoRequest);
         var questaoCreated = await questaoResponse.Content.ReadFromJsonAsync<CreatedResponse>();
 
+        var turmaResponse = await _client.PostAsJsonAsync("/api/turmas", new CreateTurmaRequest { Nome = "Turma 101" });
+        var turmaCreated = await turmaResponse.Content.ReadFromJsonAsync<CreatedResponse>();
+
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova de História",
-            Turma = "101",
+            TurmaId = turmaCreated!.Id,
             QuestoesIds = [questaoCreated!.Id]
         };
 
@@ -120,7 +123,8 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var prova = await response.Content.ReadFromJsonAsync<ProvaDetailResponse>();
         Assert.NotNull(prova);
         Assert.Equal(provaRequest.Titulo, prova.Titulo);
-        Assert.Equal(provaRequest.Turma, prova.Turma);
+        Assert.Equal(turmaCreated.Id, prova.TurmaId);
+        Assert.Equal("Turma 101", prova.TurmaNome);
         Assert.Single(prova.Questoes);
     }
 
@@ -271,10 +275,13 @@ public class ProvasIntegrationTests : IntegrationTestBase
         var questao2Response = await _client.PostAsJsonAsync("/api/questoes", questao2Request);
         var questao2Created = await questao2Response.Content.ReadFromJsonAsync<CreatedResponse>();
 
+        var turmaResponse = await _client.PostAsJsonAsync("/api/turmas", new CreateTurmaRequest { Nome = "Turma 202" });
+        var turmaCreated = await turmaResponse.Content.ReadFromJsonAsync<CreatedResponse>();
+
         var provaRequest = new CreateProvaRequest
         {
             Titulo = "Prova de Geografia",
-            Turma = "202",
+            TurmaId = turmaCreated!.Id,
             QuestoesIds = [questao1Created!.Id, questao2Created!.Id]
         };
 
@@ -289,6 +296,6 @@ public class ProvasIntegrationTests : IntegrationTestBase
         Assert.NotNull(provas);
         Assert.Single(provas);
         Assert.Equal(2, provas[0].QuantidadeQuestoes);
-        Assert.Equal("202", provas[0].Turma);
+        Assert.Equal("Turma 202", provas[0].TurmaNome);
     }
 }

@@ -10,9 +10,9 @@ public class Prova
     [StringLength(200, ErrorMessage = "O título deve ter no máximo 200 caracteres")]
     public string Titulo { get; set; } = string.Empty;
 
-    /// <summary>Número/identificador da turma à qual a prova se destina (opcional).</summary>
-    [StringLength(50, ErrorMessage = "A turma deve ter no máximo 50 caracteres")]
-    public string? Turma { get; set; }
+    /// <summary>Turma à qual a prova foi atribuída — nula significa aberta para qualquer aluno.</summary>
+    public int? TurmaId { get; set; }
+    public Turma? Turma { get; set; }
 
     /// <summary>Duração da prova em minutos — define o prazo de cada tentativa.</summary>
     public int TempoLimiteMinutos { get; set; } = 180;

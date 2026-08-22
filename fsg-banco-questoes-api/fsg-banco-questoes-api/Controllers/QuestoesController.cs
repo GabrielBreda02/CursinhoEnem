@@ -134,6 +134,40 @@ public class QuestoesController : ControllerBase
     }
 
     /// <summary>
+    /// Sorteia questões aleatórias de cada área do ENEM, pra montar rapidamente uma prova
+    /// balanceada entre as 4 áreas.
+    /// </summary>
+    /// <param name="porArea">Quantas questões sortear de cada uma das 4 áreas</param>
+    /// <returns>IDs das questões sorteadas (até 4 × porArea, menos se alguma área não tiver
+    /// questões suficientes)</returns>
+    [HttpGet("sortear")]
+    [Authorize(Roles = "Professor")]
+    [ProducesResponseType(typeof(List<int>), 200)]
+    [ProducesResponseType(typeof(ApiResponse), 400)]
+    public async Task<ActionResult<List<int>>> Sortear([FromQuery] int porArea)
+    {
+        if (porArea < 1 || porArea > 200)
+        {
+            return BadRequest(new ApiResponse { Message = "Informe uma quantidade por área entre 1 e 200", Success = false });
+        }
+
+        var rng = new Random();
+        var idsSorteados = new List<int>();
+
+        foreach (var area in AreaConhecimento.Todas)
+        {
+            var idsDaArea = await _context.Questoes
+                .Where(q => q.Area == area)
+                .Select(q => q.IdQuestao)
+                .ToListAsync();
+
+            idsSorteados.AddRange(idsDaArea.OrderBy(_ => rng.Next()).Take(porArea));
+        }
+
+        return Ok(idsSorteados);
+    }
+
+    /// <summary>
     /// Obtém uma questão específica por ID
     /// </summary>
     /// <param name="id">ID da questão</param>

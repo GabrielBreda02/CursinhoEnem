@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,24 +22,50 @@ public class ProvasController : ControllerBase
         _context = context;
     }
 
+    private int? GetUsuarioId()
+    {
+        var valor = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(valor, out var id) ? id : null;
+    }
+
     /// <summary>
-    /// Lista todas as provas
+    /// Lista as provas. Um aluno só vê provas abertas (sem turma) ou atribuídas à turma dele;
+    /// professor (ou chamada sem login) vê todas.
     /// </summary>
     /// <returns>Lista de provas</returns>
     [HttpGet]
     [ProducesResponseType(typeof(List<ProvaListResponse>), 200)]
     public async Task<ActionResult<List<ProvaListResponse>>> GetProvas()
     {
-        var provas = await _context.Provas
+        var query = _context.Provas
             .Include(p => p.Questoes)
             .Include(p => p.TemaRedacao)
-            .ToListAsync();
+            .Include(p => p.Turma)
+            .AsQueryable();
+
+        if (User.IsInRole("Aluno"))
+        {
+            var alunoId = GetUsuarioId();
+            int? turmaId = null;
+            if (alunoId.HasValue)
+            {
+                turmaId = await _context.Usuarios
+                    .Where(u => u.IdUsuario == alunoId.Value)
+                    .Select(u => u.TurmaId)
+                    .FirstOrDefaultAsync();
+            }
+
+            query = query.Where(p => p.TurmaId == null || p.TurmaId == turmaId);
+        }
+
+        var provas = await query.ToListAsync();
 
         var response = provas.Select(p => new ProvaListResponse
         {
             IdProva = p.IdProva,
             Titulo = p.Titulo,
-            Turma = p.Turma,
+            TurmaId = p.TurmaId,
+            TurmaNome = p.Turma?.Nome,
             QuantidadeQuestoes = p.Questoes.Count,
             TempoLimiteMinutos = p.TempoLimiteMinutos,
             TemaRedacaoId = p.TemaRedacaoId,
@@ -61,6 +89,7 @@ public class ProvasController : ControllerBase
             .Include(p => p.Questoes)
             .ThenInclude(q => q.Alternativas)
             .Include(p => p.TemaRedacao)
+            .Include(p => p.Turma)
             .FirstOrDefaultAsync(p => p.IdProva == id);
 
         if (prova == null)
@@ -76,7 +105,8 @@ public class ProvasController : ControllerBase
         {
             IdProva = prova.IdProva,
             Titulo = prova.Titulo,
-            Turma = prova.Turma,
+            TurmaId = prova.TurmaId,
+            TurmaNome = prova.Turma?.Nome,
             TempoLimiteMinutos = prova.TempoLimiteMinutos,
             TemaRedacaoId = prova.TemaRedacaoId,
             TemaRedacaoTitulo = prova.TemaRedacao?.Titulo,
@@ -147,6 +177,16 @@ public class ProvasController : ControllerBase
             });
         }
 
+        if (request.TurmaId.HasValue &&
+            !await _context.Turmas.AnyAsync(t => t.IdTurma == request.TurmaId.Value))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Message = $"Turma com ID {request.TurmaId} não encontrada",
+                Success = false
+            });
+        }
+
         var questoes = await _context.Questoes
             .Where(q => request.QuestoesIds.Contains(q.IdQuestao))
             .ToListAsync();
@@ -154,7 +194,7 @@ public class ProvasController : ControllerBase
         var prova = new Prova
         {
             Titulo = request.Titulo,
-            Turma = request.Turma,
+            TurmaId = request.TurmaId,
             TempoLimiteMinutos = request.TempoLimiteMinutos,
             TemaRedacaoId = request.TemaRedacaoId,
             Questoes = questoes
@@ -233,12 +273,22 @@ public class ProvasController : ControllerBase
             });
         }
 
+        if (request.TurmaId.HasValue &&
+            !await _context.Turmas.AnyAsync(t => t.IdTurma == request.TurmaId.Value))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Message = $"Turma com ID {request.TurmaId} não encontrada",
+                Success = false
+            });
+        }
+
         var questoes = await _context.Questoes
             .Where(q => request.QuestoesIds.Contains(q.IdQuestao))
             .ToListAsync();
 
         prova.Titulo = request.Titulo;
-        prova.Turma = request.Turma;
+        prova.TurmaId = request.TurmaId;
         prova.TempoLimiteMinutos = request.TempoLimiteMinutos;
         prova.TemaRedacaoId = request.TemaRedacaoId;
         prova.Questoes = questoes;

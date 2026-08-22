@@ -27,8 +27,20 @@ public class TentativaProva
     /// <summary>Quantidade de questões objetivas corretas, calculada ao finalizar.</summary>
     public int? NotaObjetivas { get; set; }
 
-    /// <summary>Nota da redação (0-1000, escala ENEM), atribuída pelo professor. Nula até ser corrigida.</summary>
-    public int? NotaRedacao { get; set; }
+    /// <summary>As 5 competências do ENEM, cada uma de 0 a 200 em múltiplos de 20. Nulas até a
+    /// redação ser corrigida pelo professor.</summary>
+    public int? NotaComp1 { get; set; }
+    public int? NotaComp2 { get; set; }
+    public int? NotaComp3 { get; set; }
+    public int? NotaComp4 { get; set; }
+    public int? NotaComp5 { get; set; }
+
+    /// <summary>Nota final da redação (soma das 5 competências, 0-1000, escala ENEM). Calculada,
+    /// não gravada — só existe quando as 5 competências estão preenchidas.</summary>
+    public int? NotaRedacao =>
+        NotaComp1.HasValue && NotaComp2.HasValue && NotaComp3.HasValue && NotaComp4.HasValue && NotaComp5.HasValue
+            ? NotaComp1 + NotaComp2 + NotaComp3 + NotaComp4 + NotaComp5
+            : null;
 
     /// <summary>Comentário/feedback do professor sobre a redação. Opcional.</summary>
     public string? ComentarioRedacao { get; set; }

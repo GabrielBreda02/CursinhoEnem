@@ -17,6 +17,7 @@ public class BancoQuestoesContext : DbContext
     public DbSet<TemaRedacao> TemasRedacao { get; set; }
     public DbSet<TentativaProva> Tentativas { get; set; }
     public DbSet<RespostaAluno> RespostasAluno { get; set; }
+    public DbSet<Turma> Turmas { get; set; }
 
     // O SQLite não guarda o Kind do DateTime — toda leitura volta com Kind=Unspecified,
     // o que faz o Newtonsoft omitir o "Z" na serialização e o navegador interpretar o
@@ -78,7 +79,6 @@ public class BancoQuestoesContext : DbContext
         {
             entity.HasKey(e => e.IdProva);
             entity.Property(e => e.Titulo).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Turma).HasMaxLength(50);
             entity.Property(e => e.TempoLimiteMinutos).IsRequired();
 
             entity.HasMany(e => e.Questoes)
@@ -92,6 +92,11 @@ public class BancoQuestoesContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.TemaRedacaoId)
                   .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(e => e.Turma)
+                  .WithMany(t => t.Provas)
+                  .HasForeignKey(e => e.TurmaId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Configuração da entidade Usuario
@@ -103,6 +108,18 @@ public class BancoQuestoesContext : DbContext
             entity.Property(e => e.SenhaHash).IsRequired();
             entity.Property(e => e.Tipo).IsRequired().HasMaxLength(20);
             entity.HasIndex(e => e.Email).IsUnique();
+
+            entity.HasOne(e => e.Turma)
+                  .WithMany(t => t.Alunos)
+                  .HasForeignKey(e => e.TurmaId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Configuração da entidade Turma
+        modelBuilder.Entity<Turma>(entity =>
+        {
+            entity.HasKey(e => e.IdTurma);
+            entity.Property(e => e.Nome).IsRequired().HasMaxLength(100);
         });
 
         // Configuração da entidade TemaRedacao
@@ -128,6 +145,8 @@ public class BancoQuestoesContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.AlunoId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Ignore(e => e.NotaRedacao);
         });
 
         // Configuração da entidade RespostaAluno

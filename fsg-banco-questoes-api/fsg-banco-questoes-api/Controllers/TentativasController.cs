@@ -67,6 +67,21 @@ public class TentativasController : ControllerBase
             return BadRequest(new ApiResponse { Message = "Essa prova não tem questões", Success = false });
         }
 
+        // Prova atribuída a uma turma só pode ser iniciada por aluno matriculado nela — o front
+        // já esconde a prova da lista (ver ProvasController.GetProvas), isso é a checagem real.
+        if (prova.TurmaId != null)
+        {
+            var turmaDoAluno = await _context.Usuarios
+                .Where(u => u.IdUsuario == alunoId.Value)
+                .Select(u => u.TurmaId)
+                .FirstOrDefaultAsync();
+
+            if (turmaDoAluno != prova.TurmaId)
+            {
+                return Forbid();
+            }
+        }
+
         // Se já existe uma tentativa não finalizada dessa mesma prova, retoma ela em vez de
         // criar outra — assim atualizar a página no meio da prova não reinicia o cronômetro
         // nem abandona as respostas já dadas.
@@ -303,6 +318,11 @@ public class TentativasController : ControllerBase
             TotalQuestoes = tentativa.Prova.Questoes.Count,
             TextoRedacao = tentativa.TextoRedacao,
             TemaRedacaoTitulo = tentativa.Prova.TemaRedacao?.Titulo,
+            NotaComp1 = tentativa.NotaComp1,
+            NotaComp2 = tentativa.NotaComp2,
+            NotaComp3 = tentativa.NotaComp3,
+            NotaComp4 = tentativa.NotaComp4,
+            NotaComp5 = tentativa.NotaComp5,
             NotaRedacao = tentativa.NotaRedacao,
             ComentarioRedacao = tentativa.ComentarioRedacao,
             Questoes = tentativa.Prova.Questoes.Select(q =>

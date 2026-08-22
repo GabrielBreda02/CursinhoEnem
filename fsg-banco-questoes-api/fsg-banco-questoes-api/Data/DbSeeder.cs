@@ -14,6 +14,7 @@ public static class DbSeeder
     public static void Seed(BancoQuestoesContext context)
     {
         SeedUsuarios(context);
+        SeedTurmas(context);
         SeedEnem(context);
         SeedProvaExemplo(context);
     }
@@ -42,6 +43,25 @@ public static class DbSeeder
         });
 
         context.SaveChanges();
+    }
+
+    private static void SeedTurmas(BancoQuestoesContext context)
+    {
+        if (context.Turmas.Any())
+        {
+            return;
+        }
+
+        var turma = new Turma { Nome = "Turma 101 — Tarde" };
+        context.Turmas.Add(turma);
+        context.SaveChanges();
+
+        var alunoTeste = context.Usuarios.FirstOrDefault(u => u.Email == "aluno@teste.com");
+        if (alunoTeste != null)
+        {
+            alunoTeste.TurmaId = turma.IdTurma;
+            context.SaveChanges();
+        }
     }
 
     private static void SeedEnem(BancoQuestoesContext context)

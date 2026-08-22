@@ -8,8 +8,7 @@ public class CreateProvaRequest
     [StringLength(200, ErrorMessage = "O título deve ter no máximo 200 caracteres")]
     public string Titulo { get; set; } = string.Empty;
 
-    [StringLength(50, ErrorMessage = "A turma deve ter no máximo 50 caracteres")]
-    public string? Turma { get; set; }
+    public int? TurmaId { get; set; }
 
     [Required(ErrorMessage = "É necessário pelo menos uma questão")]
     [MinLength(1, ErrorMessage = "Deve haver pelo menos 1 questão")]

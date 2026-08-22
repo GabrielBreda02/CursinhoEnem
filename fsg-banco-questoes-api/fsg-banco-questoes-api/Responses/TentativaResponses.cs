@@ -73,6 +73,11 @@ public class ResultadoTentativaResponse
     public int TotalQuestoes { get; set; }
     public string? TextoRedacao { get; set; }
     public string? TemaRedacaoTitulo { get; set; }
+    public int? NotaComp1 { get; set; }
+    public int? NotaComp2 { get; set; }
+    public int? NotaComp3 { get; set; }
+    public int? NotaComp4 { get; set; }
+    public int? NotaComp5 { get; set; }
     public int? NotaRedacao { get; set; }
     public string? ComentarioRedacao { get; set; }
     public List<QuestaoResultadoResponse> Questoes { get; set; } = new();

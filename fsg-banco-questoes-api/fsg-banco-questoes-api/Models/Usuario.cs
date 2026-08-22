@@ -18,4 +18,8 @@ public class Usuario
 
     /// <summary>"Professor" ou "Aluno". Ver <see cref="Requests.RegistrarUsuarioRequest"/> para a validação.</summary>
     public string Tipo { get; set; } = "Aluno";
+
+    /// <summary>Turma do aluno (nulo = sem turma ainda). O professor é quem matricula.</summary>
+    public int? TurmaId { get; set; }
+    public Turma? Turma { get; set; }
 }
